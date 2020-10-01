@@ -1,0 +1,9 @@
+/api/node_modules
+/api/public/hot
+/api/public/storage
+/api/storage/*.key
+/api/vendor
+/api/.env
+/app/dist
+/app/node_modules
+/Files
