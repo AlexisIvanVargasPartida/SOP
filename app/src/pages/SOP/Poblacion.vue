@@ -143,10 +143,10 @@
               }}</md-table-cell>
               <md-table-cell md-label="Acciónes">
                 <md-button
-                  class="md-just-icon md-info md-simple"
-                  @click.native="handleLike(item)"
+                  class="md-just-icon md-warning md-simple"
+                  @click.native="openSimpatizador(item)"
                 >
-                  <md-icon>favorite</md-icon>
+                  <md-icon>person_add</md-icon>
                 </md-button>
               </md-table-cell>
             </md-table-row>
@@ -186,6 +186,24 @@
           </pagination>
         </md-card-actions>
       </md-card>
+      <modal v-if="modalSimaptiza">
+        <template slot="body">
+          <simpatizante
+            ref="forms"
+            @data="getData"
+            :pageSize="'md-size-100'"
+          ></simpatizante>
+        </template>
+
+        <template slot="footer">
+          <md-button class="md-danger md-simple" @click="closeSimpatizador"
+            >Cancelar</md-button
+          >
+          <md-button class="md-success" @click="saveSimpatizante"
+            >Guardar</md-button
+          >
+        </template>
+      </modal>
     </div>
   </div>
 </template>
@@ -195,11 +213,14 @@ import { APIURL } from "@/api.js";
 import axios from "axios";
 import { Pagination } from "@/components";
 import Fuse from "fuse.js";
-import Swal from "sweetalert2";
+import { Modal } from "@/components";
+import Simpatizante from "./Forms/Simpatiza";
 
 export default {
   components: {
-    Pagination
+    Pagination,
+    Modal,
+    Simpatizante
   },
   computed: {
     /***
@@ -262,10 +283,33 @@ export default {
       entidades: [],
       municipios: [],
       secciones: [],
-      loader: false
+      loader: false,
+      modalSimaptiza: false,
+      respuesta: {
+        simpatiza: "",
+        participacion: "",
+        negativa: ""
+      },
+      itemSelected: null
     };
   },
   methods: {
+    getData(data) {
+      this.respuesta[data.field] = data.value;
+    },
+    saveSimpatizante() {
+      if (
+        ((this.respuesta.simpatiza == "SI" ||
+          this.respuesta.simpatiza == "NO") &&
+          this.respuesta.participacion == "" &&
+          this.respuesta.negativa == "") ||
+        this.respuesta.simpatiza == ""
+      ) {
+        console.log("fail");
+      } else {
+        console.log("bien");
+      }
+    },
     customSort(value) {
       return value.sort((a, b) => {
         const sortBy = this.currentSort;
@@ -275,13 +319,13 @@ export default {
         return b[sortBy].localeCompare(a[sortBy]);
       });
     },
-    handleLike(item) {
-      Swal.fire({
-        title: `Simpatiza ${item.nombre}`,
-        buttonsStyling: false,
-        type: "success",
-        confirmButtonClass: "md-button md-success"
-      });
+    openSimpatizador(item) {
+      this.modalSimaptiza = true;
+      this.itemSelected = item;
+    },
+    closeSimpatizador() {
+      this.modalSimaptiza = false;
+      this.itemSelected = null;
     },
     getEntidades() {
       let cObject = this;

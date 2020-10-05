@@ -36,20 +36,37 @@
             </ValidationProvider>
           </div>
           <div class="md-layout-item md-size-60 md-small-size-100 mx-auto">
-            <md-field>
-              <label>Partido Politíco</label>
-              <md-input
-                v-model="partido"
-                type="text"
-                @change="sendData('partido', partido)"
-                @keyup.prevent="
-                  partido = $helpers.todasMayusculas($event.target.value)
-                "
+            <ValidationProvider
+              name="clave"
+              rules="required"
+              v-slot="{ passed, failed }"
+            >
+              <md-field
+                :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
               >
-              </md-input>
-            </md-field>
+                <label>Partido Politíco</label>
+                <md-input
+                  v-model="partido"
+                  type="text"
+                  @change="sendData('partido', partido)"
+                  @keyup.prevent="
+                    partido = $helpers.todasMayusculas($event.target.value)
+                  "
+                >
+                </md-input>
+                <slide-y-down-transition>
+                  <md-icon class="error" v-show="failed">close</md-icon>
+                </slide-y-down-transition>
+                <slide-y-down-transition>
+                  <md-icon class="success" v-show="passed">done</md-icon>
+                </slide-y-down-transition>
+              </md-field>
+            </ValidationProvider>
           </div>
-          <div class="md-layout-item md-size-60 md-small-size-100 mx-auto">
+          <div
+            class="md-layout-item md-size-60 md-small-size-100 mx-auto"
+            v-if="1 == 2"
+          >
             <ValidationProvider
               name="clave"
               rules="required|min:18|max:18|clve"

@@ -5,6 +5,7 @@ import AuthLayout from "@/pages/SOP/Layout/AuthLayout.vue";
 import Dashboard from "@/pages/SOP/Dashboard.vue";
 import RegistroPoblacion from "@/pages/SOP/RegistroPoblacion.vue";
 import Poblacion from "@/pages/SOP/Poblacion.vue";
+import Graficas from "@/pages/SOP/Graficas.vue";
 
 import Login from "@/pages/SOP/Authentication/Login.vue";
 import Register from "@/pages/SOP/Authentication/Register.vue";
@@ -73,6 +74,16 @@ const routes = [
         meta: {
           requiresAuth: true,
           title: "SOP | Población",
+          permission: true
+        }
+      },
+      {
+        path: "graficas",
+        name: "Graficas",
+        component: Graficas,
+        meta: {
+          requiresAuth: true,
+          title: "SOP | Graficas",
           permission: true
         }
       }

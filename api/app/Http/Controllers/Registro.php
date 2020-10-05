@@ -25,7 +25,7 @@ class Registro extends Controller
             'email'         => 'string|email',
             'nombre'      => 'required|string',
             'partido'      => 'required|string',
-            'ce'      => 'required|string',
+            'ce'      => 'string',
             'password'      => 'required|string'
         ])->validate();
 

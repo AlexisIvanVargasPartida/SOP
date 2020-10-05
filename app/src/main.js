@@ -9,6 +9,7 @@ import DashboardPlugin from "./material-dashboard";
 import App from "./App.vue";
 import Chartist from "chartist";
 import routes from "./routes/routes";
+import VueApexCharts from "vue-apexcharts";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import StoreData from "./store";
@@ -19,6 +20,8 @@ Vue.use(DashboardPlugin);
 Vue.use(Vuex);
 Vue.use(VueAxios, axios);
 Vue.use(StoreData);
+Vue.use(VueApexCharts);
+Vue.component("apexchart", VueApexCharts);
 
 Vue.prototype.$Chartist = Chartist;
 Vue.prototype.$helpers = helpers;

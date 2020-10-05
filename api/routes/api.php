@@ -34,6 +34,9 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/candidato/{id}/{entidad}/{municipio_id}/secciones', 'Busquedas\BusquedasCandidatos@candidatoSecciones');
     Route::get('/candidato/{id}/{entidad}/{municipio_id}/{seccion_id}/poblacion', 'Busquedas\BusquedasCandidatos@candidatoPoblacion');
     
+    //GRAFICAS
+    Route::get('/candidato/{id}/{entidad}/grafica/municipios', 'Graficas@candidatoMunicipios');
+
     //TEST AUTH
     Route::get('/user/{id}', function (Request $request, $id) {
         if ($request->user()->tokenCan('user.view') || $request->user()->id == $id) return $request->user();

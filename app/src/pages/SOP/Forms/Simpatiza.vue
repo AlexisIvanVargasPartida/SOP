@@ -6,7 +6,7 @@
           Conocimiento para el candidato
         </h5>
         <div class="md-layout">
-          <div class="md-layout-item md-size-70 md-small-size-100 mx-auto">
+          <div class="md-layout-item md-small-size-100 mx-auto" :class="pageSize">
             <div class="md-layout">
               <label
                 class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100 md-form-label"
@@ -117,6 +117,12 @@ import { required } from "vee-validate/dist/rules";
 extend("required", required);
 
 export default {
+  props:{
+    pageSize: {
+      type: String,
+      default: "md-size-70"
+    },
+  },
   data() {
     return {
       simpatiza: "",
@@ -148,11 +154,4 @@ export default {
 };
 </script>
 <style lang="scss">
-.vue-treeselect__menu {
-  max-height: 200px !important;
-  border: 0px !important;
-}
-.vue-treeselect__control {
-  display: none;
-}
 </style>

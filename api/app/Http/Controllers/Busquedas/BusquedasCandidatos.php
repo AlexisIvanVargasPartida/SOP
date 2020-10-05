@@ -84,7 +84,6 @@ class BusquedasCandidatos extends Controller
         return response()->json(["data" => $data], 200);
     }
 
-
     public function candidatoSecciones(Request $request, $id, $entidad, $municipio_id)
     {
         if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
