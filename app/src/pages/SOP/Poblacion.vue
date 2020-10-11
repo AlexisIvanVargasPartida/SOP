@@ -143,11 +143,13 @@
               }}</md-table-cell>
               <md-table-cell md-label="Acciónes">
                 <md-button
+                  v-if="!item.simpatiza"
                   class="md-just-icon md-warning md-simple"
                   @click.native="openSimpatizador(item)"
                 >
                   <md-icon>person_add</md-icon>
                 </md-button>
+                <badge v-else type="warning">{{item.simpatiza}}</badge>
               </md-table-cell>
             </md-table-row>
           </md-table>
@@ -196,12 +198,24 @@
         </template>
 
         <template slot="footer">
-          <md-button class="md-danger md-simple" @click="closeSimpatizador"
+          <md-button
+            v-if="!asycFinish"
+            class="md-danger md-simple"
+            @click="closeSimpatizador"
             >Cancelar</md-button
           >
-          <md-button class="md-success" @click="saveSimpatizante"
+          <md-button
+            v-if="!asycFinish"
+            class="md-success"
+            @click="saveSimpatizante"
             >Guardar</md-button
           >
+          <md-progress-spinner
+            :md-diameter="30"
+            :md-stroke="3"
+            md-mode="indeterminate"
+            v-if="asycFinish"
+          ></md-progress-spinner>
         </template>
       </modal>
     </div>
@@ -215,12 +229,13 @@ import { Pagination } from "@/components";
 import Fuse from "fuse.js";
 import { Modal } from "@/components";
 import Simpatizante from "./Forms/Simpatiza";
-
+import { Badge } from "@/components";
 export default {
   components: {
     Pagination,
     Modal,
-    Simpatizante
+    Simpatizante,
+    Badge
   },
   computed: {
     /***
@@ -255,6 +270,7 @@ export default {
   },
   data() {
     return {
+      asycFinish: false,
       currentSort: "nombre",
       currentSortOrder: "asc",
       pagination: {
@@ -307,7 +323,38 @@ export default {
       ) {
         console.log("fail");
       } else {
-        console.log("bien");
+        let cObject = this;
+        this.asycFinish = true;
+        let dataCandidato = {
+          telefonos: [],
+          negativa: this.respuesta.negativa || null,
+          participacion: this.respuesta.participacion || null,
+          redsocial: null
+        };
+
+        axios
+          .post(
+            APIURL + "registro/simpatizante",
+            {
+              simpatizante: this.itemSelected.id,
+              simpatiza: this.respuesta.simpatiza,
+              seccion: this.seccion,
+              data: JSON.stringify(dataCandidato)
+            },
+            {
+              headers: {
+                Authorization:
+                  "Bearer " + this.$store.state.sop.authorization.token
+              }
+            }
+          )
+          .then(response => {
+            cObject.closeSimpatizador();
+            cObject.asycFinish = false;
+          })
+          .catch(error => {
+            console.log(error.response || error.message);
+          });
       }
     },
     customSort(value) {
@@ -481,5 +528,12 @@ export default {
   border: 0;
   margin-left: 20px;
   margin-right: 20px;
+}
+</style>
+<style>
+.md-table-cell:last-child,
+.md-table-head:last-child {
+  text-align: center !important;
+  justify-content: center;
 }
 </style>

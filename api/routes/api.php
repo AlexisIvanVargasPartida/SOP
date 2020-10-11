@@ -27,7 +27,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/entidades', 'Busquedas\BusquedasCandidatos@entidadesFederativas');
     Route::get('/colonias/{cp}', 'Busquedas\BusquedasCandidatos@getColonias');
     Route::get('/secciones/{cp}/{colonia}', 'Busquedas\BusquedasCandidatos@getColoniasSecciones');
-    Route::post('/registro/poblacion', 'Busquedas\BusquedasCandidatos@registroPoblacion');
+    Route::post('/registro/poblacion', 'Simpatizantes@registroPoblacion');
+    Route::post('/registro/simpatizante', 'Simpatizantes@registroSimpatizante');
 
     Route::get('/candidato/{id}/entidades', 'Busquedas\BusquedasCandidatos@candidatoEntidades');
     Route::get('/candidato/{id}/{entidad}/municipios', 'Busquedas\BusquedasCandidatos@candidatoMunicipios');

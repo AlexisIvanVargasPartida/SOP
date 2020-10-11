@@ -41,7 +41,6 @@ class UsersController extends Controller
             return $this->customError("Usuario Inactivo", 401);
         }
         $scope = $user->getPermissions();
-        //dd($user->toArray(), $scope);
         return $this->sendRequest($request, $this->valid_providers['admin'], $scope);
     }
 

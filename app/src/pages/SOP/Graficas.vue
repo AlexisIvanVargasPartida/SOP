@@ -71,13 +71,16 @@ export default {
   },
   computed: {
     simpatizan() {
-      return this.series[0].data.reduce((a, b) => a + b, 0);
+      let data = this.series[0].data;
+      return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
     nosimpatizan() {
-      return this.series[1].data.reduce((a, b) => a + b, 0);
+      let data = this.series[1].data;
+      return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
     nonosconoce() {
-      return this.series[2].data.reduce((a, b) => a + b, 0);
+      let data = this.series[2].data;
+      return data ? data.reduce((a, b) => a + b, 0) : 0;
     }
   },
   data() {
@@ -198,7 +201,7 @@ export default {
             "candidato/" +
             this.$store.state.sop.user.idcandidato +
             "/" +
-            this.entidad +
+            18 +
             "/grafica/municipios",
           {
             headers: {
