@@ -149,7 +149,7 @@
                 >
                   <md-icon>person_add</md-icon>
                 </md-button>
-                <badge v-else type="warning">{{item.simpatiza}}</badge>
+                <badge v-else type="warning">{{ item.simpatiza }}</badge>
               </md-table-cell>
             </md-table-row>
           </md-table>
@@ -349,8 +349,15 @@ export default {
             }
           )
           .then(response => {
-            cObject.closeSimpatizador();
+            let row = cObject.tableData.findIndex(
+              item => item.id === cObject.itemSelected.id
+            );
+            if (row > -1) {
+              cObject.tableData[row].simpatiza = cObject.respuesta.simpatiza;
+            }
+            console.log(row, cObject.respuesta.simpatiza);
             cObject.asycFinish = false;
+            cObject.closeSimpatizador();
           })
           .catch(error => {
             console.log(error.response || error.message);

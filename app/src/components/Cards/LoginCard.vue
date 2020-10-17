@@ -2,9 +2,9 @@
   <md-card class="md-card-login" :class="{ 'md-card-hidden': cardHidden }">
     <md-card-header :class="getClass(headerColor)">
       <slot name="title"></slot>
-      <div class="social-line">
+      <!--<div class="social-line">
         <slot name="buttons"></slot>
-      </div>
+      </div>-->
     </md-card-header>
 
     <md-card-content>

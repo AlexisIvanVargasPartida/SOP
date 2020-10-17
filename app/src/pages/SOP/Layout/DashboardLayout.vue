@@ -7,7 +7,7 @@
       :data-background-color="sidebarBackgroundColor"
     >
       <user-menu></user-menu>
-      <mobile-menu></mobile-menu>
+      <!--<mobile-menu></mobile-menu>-->
       <template slot="links">
         <sidebar-item
           :link="{ name: 'Tablero', icon: 'dashboard', path: '/dashboard' }"
@@ -111,7 +111,7 @@ export default {
     TopNavbar,
     ContentFooter,
     FixedPlugin,
-    MobileMenu,
+    //MobileMenu,
     UserMenu,
     ZoomCenterTransition
   },

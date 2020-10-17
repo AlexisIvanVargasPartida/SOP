@@ -210,9 +210,9 @@
 
   .md-table-cell:last-child .md-table-cell-container,
   .md-table-head:last-child{
-    text-align: right !important;
+    //text-align: right !important;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
   }
 
   .md-table-head {

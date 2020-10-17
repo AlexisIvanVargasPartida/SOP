@@ -87,7 +87,6 @@ export default {
     },
     wizardComplete() {
       this.sendForm();
-      console.log(this.data);
     },
     sendForm() {
       let cObject = this;

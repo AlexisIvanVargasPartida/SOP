@@ -6,7 +6,7 @@
     z-index: 1031;
     border-radius: 8px 0 0 8px;
     text-align: center;
-    top: 85px;
+    top: calc(100vh - 100px);
 
     li > a,
     .badge{
@@ -29,7 +29,7 @@
     .dropdown-menu{
         right: 80px;
         left: auto !important;
-        top: -41px !important;
+        top: -330px !important;
         width: 290px;
         border-radius: 10px;
         padding: 0 10px;
@@ -333,7 +333,7 @@
                border-top: 16px solid transparent;
                 display: inline-block;
                 position: absolute;
-                top: 65px;
+                top: 88%;
                 width: 16px;
                 transform: translateY(-50%);
                 -webkit-transform: translateY(-50%);

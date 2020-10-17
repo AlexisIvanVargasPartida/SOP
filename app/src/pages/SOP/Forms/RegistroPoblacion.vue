@@ -8,13 +8,8 @@
         <div class="md-layout">
           <div class="md-layout-item md-size-70 md-small-size-100 mx-auto">
             <div class="md-layout">
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Nombres
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-100 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="nombre"
@@ -24,7 +19,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Nombre</label>
+                    <label>Nombres</label>
                     <md-input
                       v-model="nombre"
                       type="text"
@@ -40,13 +35,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Apellidos
-              </label>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="apellidop"
@@ -56,7 +46,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Paterno</label>
+                    <label>Apellido Paterno</label>
                     <md-input
                       v-model="apellidop"
                       type="text"
@@ -75,7 +65,7 @@
                 </ValidationProvider>
               </div>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="apellidom"
@@ -85,7 +75,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Materno</label>
+                    <label>Apellido Materno</label>
                     <md-input
                       v-model="apellidom"
                       type="text"
@@ -104,12 +94,13 @@
                 </ValidationProvider>
               </div>
               <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
+                class="md-layout-item md-size-100 md-form-label"
+                style="padding-left: 10px;"
               >
                 Fecha de Nacimiento
               </label>
               <div
-                class="md-layout-item md-size-25 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="day"
@@ -133,7 +124,7 @@
                 </ValidationProvider>
               </div>
               <div
-                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="month"
@@ -143,6 +134,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
+                    <label>Mes</label>
                     <md-select
                       v-model="month"
                       name="month"
@@ -152,7 +144,6 @@
                         generaCE();
                       "
                     >
-                      <md-option value="">-- Mes --</md-option>
                       <md-option value="1">Enero</md-option>
                       <md-option value="2">Febrero</md-option>
                       <md-option value="3">Marzo</md-option>
@@ -170,11 +161,11 @@
                 </ValidationProvider>
               </div>
               <div
-                class="md-layout-item md-size-25 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="year"
-                  rules="required|numeric|min_value:1900|max_value:2002"
+                  rules="required|numeric|min_value:1920|max_value:2002"
                   v-slot="{ passed, failed }"
                 >
                   <md-field
@@ -193,13 +184,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Lugar de Nacimiento
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="nacimiento"
@@ -209,6 +195,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
+                    <label>Lugar de Nacimiento</label>
                     <md-select
                       v-model="nacimiento"
                       name="nacimiento"
@@ -218,7 +205,6 @@
                         generaCE();
                       "
                     >
-                      <md-option value="">-- Lugar --</md-option>
                       <md-option
                         v-for="ef in entidadeFederativas"
                         :key="ef.id"
@@ -229,13 +215,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Sexo
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="sexo"
@@ -245,6 +226,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
+                    <label>Sexo</label>
                     <md-select
                       v-model="sexo"
                       name="sexo"
@@ -254,20 +236,14 @@
                         generaCE();
                       "
                     >
-                      <md-option value="">-- Sexo --</md-option>
                       <md-option value="H">Hombre</md-option>
                       <md-option value="M">Mujer</md-option>
                     </md-select>
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-medium-size-100 md-form-label"
-              >
-                Clave Elector
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-100 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="ce"
@@ -288,13 +264,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                C.P
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="cp"
@@ -317,13 +288,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Colonia
-              </label>
               <div
-                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="colonia"
@@ -333,6 +299,7 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
+                    <label>Colonia</label>
                     <md-select
                       v-model="colonia"
                       name="colonia"
@@ -342,7 +309,6 @@
                         getColoniasSecciones();
                       "
                     >
-                      <md-option value="">-- Colonia --</md-option>
                       <md-option
                         v-for="(col, id) in colonias"
                         :key="id"
@@ -353,13 +319,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Sección
-              </label>
               <div
-                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="seccion"
@@ -369,13 +330,13 @@
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
+                    <label>Sección</label>
                     <md-select
                       v-model="seccion"
                       name="seccion"
                       id="seccion"
                       @input="sendData('seccion', seccion)"
                     >
-                      <md-option value="">-- Sección --</md-option>
                       <md-option
                         v-for="(sec, id) in secciones"
                         :key="id"
@@ -386,13 +347,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Calle
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-100 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="calle"
@@ -415,13 +371,8 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Número
-              </label>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="numext"
@@ -445,7 +396,7 @@
                 </ValidationProvider>
               </div>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <md-field>
                   <label>Número Interior</label>
@@ -460,13 +411,8 @@
                   </md-input>
                 </md-field>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Teléfono
-              </label>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="telefono"
@@ -487,7 +433,7 @@
                 </ValidationProvider>
               </div>
               <div
-                class="md-layout-item md-size-40 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
                   name="adicional_tel"
@@ -507,16 +453,11 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <label
-                class="md-layout-item md-size-20 md-small-size-100 md-medium-size-100 md-form-label"
-              >
-                Facebook
-              </label>
               <div
-                class="md-layout-item md-size-80 md-small-size-100 md-medium-size-100"
+                class="md-layout-item md-size-100 md-small-size-100 md-medium-size-100"
               >
                 <md-field>
-                  <label>Nombre Facebook</label>
+                  <label>Usuario Facebook</label>
                   <md-input
                     v-model="redsocial"
                     type="text"

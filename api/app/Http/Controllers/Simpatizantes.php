@@ -15,7 +15,7 @@ class Simpatizantes extends Controller
     {
 
         try {
-            $getDatos = DB::table('secciones')->where("id", $request->seccion)->first();
+            $getDatos = DB::table('secciones_colonias')->where("id", $request->seccion)->first();
             $localidad = DB::table('localidades_secciones')
                 ->where("clave_entidad_federal", $getDatos->clave_entidad_federal)
                 ->where("clave_municipio", $getDatos->clave_municipio)
@@ -48,7 +48,7 @@ class Simpatizantes extends Controller
             );
             return response()->json("Ok", 200);
         } catch (\Throwable $th) {
-            return response()->json("Error", 404);
+            return response()->json(["error"=>$th->getMessage()], 404);
         }
     }
     public function registroSimpatizante(Request $request)
