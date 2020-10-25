@@ -6,6 +6,7 @@ import Dashboard from "@/pages/SOP/Dashboard.vue";
 import RegistroPoblacion from "@/pages/SOP/RegistroPoblacion.vue";
 import Poblacion from "@/pages/SOP/Poblacion.vue";
 import Graficas from "@/pages/SOP/Graficas.vue";
+import GraficasFiltro from "@/pages/SOP/GraficasFiltro.vue";
 
 import Login from "@/pages/SOP/Authentication/Login.vue";
 import Register from "@/pages/SOP/Authentication/Register.vue";
@@ -48,7 +49,7 @@ const routes = [
     component: DashboardLayout,
     children: [
       {
-        path: "dashboard",
+        path: "/dashboard",
         name: "Dashboard",
         component: Dashboard,
         meta: {
@@ -58,7 +59,7 @@ const routes = [
         }
       },
       {
-        path: "poblacion/registro",
+        path: "/poblacion/registro",
         name: "Registro Poblacion",
         component: RegistroPoblacion,
         meta: {
@@ -68,7 +69,7 @@ const routes = [
         }
       },
       {
-        path: "poblacion",
+        path: "/poblacion",
         name: "Poblacion",
         component: Poblacion,
         meta: {
@@ -78,12 +79,22 @@ const routes = [
         }
       },
       {
-        path: "graficas",
+        path: "/graficas",
         name: "Graficas",
         component: Graficas,
         meta: {
           requiresAuth: true,
           title: "SOP | Graficas",
+          permission: true
+        }
+      },
+      {
+        path: "/graficas/:filtro",
+        name: "Graficas Filtro",
+        component: GraficasFiltro,
+        meta: {
+          requiresAuth: true,
+          title: "SOP | Graficas Filtro",
           permission: true
         }
       }

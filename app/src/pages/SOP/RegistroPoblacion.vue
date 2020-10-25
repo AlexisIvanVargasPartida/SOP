@@ -95,6 +95,7 @@ export default {
         telefonos: [],
         negativa: this.data.negativa || null,
         participacion: this.data.participacion || null,
+        likeconocer: this.data.likeconocer || null,
         redsocial: this.data.redsocial || null
       };
 

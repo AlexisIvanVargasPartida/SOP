@@ -211,6 +211,7 @@
                         :value="ef.id"
                         >{{ ef.nombre }}</md-option
                       >
+                      <md-option value="99">EXTRANJERO</md-option>
                     </md-select>
                   </md-field>
                 </ValidationProvider>
@@ -618,7 +619,7 @@ export default {
       validate: value =>
         new Promise(resolve => {
           let regex = new RegExp(
-            "[A-Z]{6}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[0-3]{1}[0-9]{1}[HM]{1}$"
+            "[A-Z]{6}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[0-3]|[9]{1}[0-9]{1}[HM]{1}$"
             //"[A-Z]{6}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[0-3]{1}[0-9]{1}[HM]{1}[0-9]{1}[0-9]{2}$"
           );
           resolve({

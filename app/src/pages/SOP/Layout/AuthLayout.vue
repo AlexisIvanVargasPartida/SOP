@@ -21,7 +21,7 @@
             :class="{ 'off-canvas-sidebar': responsive }"
           >
             <md-list>
-              <md-list-item to="/registro" v-if="$route.path != '/registro'">
+              <md-list-item to="/registro" v-if="$route.path != '/registro' && 1==2">
                 <md-icon>person_add</md-icon>
                 Registro
               </md-list-item>

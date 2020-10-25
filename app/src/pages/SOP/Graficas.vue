@@ -1,7 +1,7 @@
 <template>
   <div class="md-layout">
     <div
-      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-33"
+      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-25"
     >
       <stats-card header-color="green">
         <template slot="header">
@@ -13,10 +13,16 @@
             {{ simpatizan }}
           </h3>
         </template>
+        <template slot="footer">
+          <div class="stats">
+            <md-icon class="text-default">filter_alt</md-icon>
+            <router-link to="/graficas/simpatizantes">Ver Detalle</router-link>
+          </div>
+        </template>
       </stats-card>
     </div>
     <div
-      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-33"
+      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-25"
     >
       <stats-card header-color="rose">
         <template slot="header">
@@ -28,10 +34,16 @@
             {{ nosimpatizan }}
           </h3>
         </template>
+        <template slot="footer">
+          <div class="stats">
+            <md-icon class="text-default">filter_alt</md-icon>
+            <router-link to="/graficas/nosimpatizantes">Ver Detalle</router-link>
+          </div>
+        </template>
       </stats-card>
     </div>
     <div
-      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-33"
+      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-25"
     >
       <stats-card header-color="blue">
         <template slot="header">
@@ -43,18 +55,40 @@
             {{ nonosconoce }}
           </h3>
         </template>
+        <template slot="footer">
+          <div class="stats">
+            <md-icon class="text-default">filter_alt</md-icon>
+            <router-link to="/graficas/noconocen">Ver Detalle</router-link>
+          </div>
+        </template>
+      </stats-card>
+    </div>
+    <div
+      class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-25"
+    >
+      <stats-card header-color="default">
+        <template slot="header">
+          <div class="card-icon">
+            <i class="fa fa-users"></i>
+          </div>
+          <p class="category">No deciden</p>
+          <h3 class="title">
+            {{ nodeciden }}
+          </h3>
+        </template>
+        <template slot="footer">
+          <div class="stats">
+            <md-icon class="text-default">filter_alt</md-icon>
+            <router-link to="/graficas/nodeciden">Ver Detalle</router-link>
+          </div>
+        </template>
       </stats-card>
     </div>
 
     <div class="md-layout-item md-size-100">
       <md-card>
-        <md-card-content>
-          <apexchart
-            type="bar"
-            height="550"
-            :options="chartOptions"
-            :series="series"
-          ></apexchart> </md-card-content
+        <md-card-content
+          ><highcharts :options="chartOptions"></highcharts> </md-card-content
       ></md-card>
     </div>
   </div>
@@ -64,108 +98,119 @@
 import { APIURL } from "@/api.js";
 import axios from "axios";
 import { StatsCard } from "@/components";
+import { Chart } from "highcharts-vue";
 
 export default {
   components: {
-    StatsCard
+    StatsCard,
+    highcharts: Chart
   },
   computed: {
     simpatizan() {
-      let data = this.series[0].data;
+      let data = this.chartOptions.series[3].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
     nosimpatizan() {
-      let data = this.series[1].data;
+      let data = this.chartOptions.series[2].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
     nonosconoce() {
-      let data = this.series[2].data;
+      let data = this.chartOptions.series[1].data;
+      return data ? data.reduce((a, b) => a + b, 0) : 0;
+    },
+    nodeciden() {
+      let data = this.chartOptions.series[0].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
     }
   },
   data() {
     return {
-      entidades: [],
-      entidad: null,
-      series: [
-        {
-          name: "Simpatizan",
-          data: []
-        },
-        {
-          name: "No Simpatizan",
-          data: []
-        },
-        {
-          name: "No nos conocen",
-          data: []
-        }
-      ],
       chartOptions: {
         chart: {
-          type: "bar",
-          height: 350,
-          stacked: true,
-          zoom: {
-            enabled: true
+          renderTo: "container",
+          type: "area",
+          panning: true
+        },
+        title: {
+          text:
+            (this.$store.state.sop.user.candidato || "Simaptizantes") +
+            " | Población Simpatizantes"
+        },
+        xAxis: {
+          categories: ["SOP"],
+          max: 6,
+          labels: {
+            useHTML: true,
+            formatter: function() {
+              return (
+                '<button class="md-button md-success md-simple md-sm" onclick="getDataMunicipio(\'' +
+                this.value +
+                "')\">" +
+                getName(this.value) +
+                "</button>"
+              );
+            }
+          }
+        },
+        yAxis: {
+          min: 0,
+          allowDecimals: false,
+          title: {
+            text: "Total Registros Población"
           },
           events: {
-            dataPointSelection: function(event, chartContext, opts) {
-              //console.log(opts.w.config.xaxis.categories[opts.dataPointIndex]);
-              //generar ruta para grafica
-              console.log(opts.w.config.xaxis.claves[opts.dataPointIndex]);
+            click: function() {
+              console.log(this);
             }
           }
         },
         plotOptions: {
-          bar: {
-            horizontal: true
-          }
-        },
-        colors: ["#60b664", "#e83874", "#14bace"],
-        stroke: {
-          width: 1,
-          colors: ["#fff"]
-        },
-        title: {
-          text: "Población - Simpatizantes"
-        },
-        xaxis: {
-          categories: [],
-          tickPlacement: "on",
-          labels: {
-            formatter: function(val) {
-              return val.toFixed(1);
+          series: {
+            stacking: "normal",
+            cursor: "pointer",
+            dataLabels: {
+              enabled: false
+            },
+            point: {
+              events: {
+                click: function() {
+                  console.log(this.series.userOptions.name, "--");
+                }
+              }
             }
           }
         },
-        yaxis: {
-          title: {
-            text: undefined
+        series: [
+          {
+            name: "Simpatizan",
+            data: [0]
+          },
+          {
+            name: "No Simpatizan",
+            data: [0]
+          },
+          {
+            name: "No nos conocen",
+            data: [0]
+          },
+          {
+            name: "No deciden",
+            data: [0]
           }
-        },
-        tooltip: {
-          y: {
-            formatter: function(val) {
-              return val + "";
-            }
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        legend: {
-          position: "top",
-          horizontalAlign: "left",
-          offsetX: 40
-        },
-        noData: {
-          text: "Loading..."
-        }
-      }
+        ]
+      },
+      entidades: [],
+      entidad: null,
+      categorias: []
     };
   },
   methods: {
+    getDataMunicipio: function(data) {
+      console.log(data);
+    },
+    getName: function(item) {
+      return this.categorias[item];
+    },
     getEntidades() {
       let cObject = this;
       axios
@@ -183,9 +228,8 @@ export default {
         )
         .then(response => {
           cObject.entidades = response.data.data;
-          cObject.entidades.length > 0
-            ? (cObject.entidad = cObject.entidades[0].id)
-            : null;
+          if (cObject.entidades.length > 0)
+            cObject.entidad = cObject.entidades[0].id;
           cObject.getMunicipios();
         })
         .catch(error => {
@@ -202,7 +246,7 @@ export default {
             this.$store.state.sop.user.idcandidato +
             "/" +
             18 +
-            "/grafica/municipios",
+            "/grafica/municipios/all",
           {
             headers: {
               Authorization:
@@ -211,25 +255,25 @@ export default {
           }
         )
         .then(response => {
-          cObject.chartOptions = {
-            xaxis: {
-              categories: response.data.data.Municipios,
-              claves: response.data.data.Claves
-            }
-          };
+          cObject.categorias = response.data.data.idMunicipios;
+          cObject.chartOptions.xAxis.categories = response.data.data.Municipios;
 
-          cObject.series = [
+          cObject.chartOptions.series = [
             {
-              name: "Simpatizan",
-              data: response.data.data.Simpatizantes
+              name: "No deciden",
+              data: response.data.data.NoDecide
+            },
+            {
+              name: "No nos conocen",
+              data: response.data.data.NoNosConoce
             },
             {
               name: "No Simpatizan",
               data: response.data.data.NoSimpatiza
             },
             {
-              name: "No nos conocen",
-              data: response.data.data.NoNosConoce
+              name: "Simpatizan",
+              data: response.data.data.Simpatizantes
             }
           ];
         })
@@ -239,7 +283,14 @@ export default {
     }
   },
   created() {
+    window.getDataMunicipio = this.getDataMunicipio;
+    window.getName = this.getName;
     this.getEntidades();
   }
 };
 </script>
+<style>
+.highcharts-credits {
+  display: none;
+}
+</style>

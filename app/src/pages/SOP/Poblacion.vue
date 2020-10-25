@@ -1,7 +1,8 @@
 <template>
   <div class="md-layout">
     <div
-      class="md-layout-item md-size-33 md-medium-size-100 md-small-size-100"
+      class="md-layout-item md-medium-size-100 md-small-size-100"
+      :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
       v-if="entidades.length > 1"
     >
       <md-card>
@@ -30,7 +31,8 @@
       </md-card>
     </div>
     <div
-      class="md-layout-item md-size-33 md-medium-size-100 md-small-size-100 mx-auto"
+      class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
+      :class="entidades.length > 1 ? 'md-size-33' : 'md-size-50'"
     >
       <md-card>
         <md-card-header class="md-card-header-icon md-card-header-green">
@@ -57,7 +59,8 @@
       </md-card>
     </div>
     <div
-      class="md-layout-item md-size-33 md-medium-size-100 md-small-size-100 mx-auto"
+      class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
+      :class="entidades.length > 1 ? 'md-size-33' : 'md-size-50'"
     >
       <md-card>
         <md-card-header class="md-card-header-icon md-card-header-green">
@@ -190,6 +193,18 @@
       </md-card>
       <modal v-if="modalSimaptiza">
         <template slot="body">
+          <div class="md-layout-item md-size-100 md-small-size-100">
+            <md-field>
+              <label>Número Teléfono</label>
+              <md-input v-model="respuesta.telefono" type="text"> </md-input>
+            </md-field>
+          </div>
+          <div class="md-layout-item md-size-100 md-small-size-100">
+            <md-field>
+              <label>Usuario Facebook</label>
+              <md-input v-model="respuesta.redsocial" type="text"> </md-input>
+            </md-field>
+          </div>
           <simpatizante
             ref="forms"
             @data="getData"
@@ -304,7 +319,9 @@ export default {
       respuesta: {
         simpatiza: "",
         participacion: "",
-        negativa: ""
+        negativa: "",
+        telefono: "",
+        redsocial: ""
       },
       itemSelected: null
     };
@@ -315,21 +332,23 @@ export default {
     },
     saveSimpatizante() {
       if (
-        ((this.respuesta.simpatiza == "SI" ||
-          this.respuesta.simpatiza == "NO") &&
+        (this.respuesta.simpatiza != "NO DECIDE" &&
           this.respuesta.participacion == "" &&
-          this.respuesta.negativa == "") ||
-        this.respuesta.simpatiza == ""
+          this.respuesta.negativa == "" &&
+          this.respuesta.likeconocer == "") ||
+        this.respuesta.simpatiza == "" ||
+        (this.respuesta.telefono == "" && this.respuesta.redsocial == "")
       ) {
-        console.log("fail");
+        alert("Completa la información");
       } else {
         let cObject = this;
         this.asycFinish = true;
         let dataCandidato = {
-          telefonos: [],
+          telefonos: [this.respuesta.telefono] || [],
           negativa: this.respuesta.negativa || null,
           participacion: this.respuesta.participacion || null,
-          redsocial: null
+          likeconocer: this.respuesta.likeconocer || null,
+          redsocial: this.respuesta.redsocial || null
         };
 
         axios
@@ -352,10 +371,8 @@ export default {
             let row = cObject.tableData.findIndex(
               item => item.id === cObject.itemSelected.id
             );
-            if (row > -1) {
+            if (row > -1)
               cObject.tableData[row].simpatiza = cObject.respuesta.simpatiza;
-            }
-            console.log(row, cObject.respuesta.simpatiza);
             cObject.asycFinish = false;
             cObject.closeSimpatizador();
           })
@@ -380,6 +397,13 @@ export default {
     closeSimpatizador() {
       this.modalSimaptiza = false;
       this.itemSelected = null;
+      this.respuesta = {
+        simpatiza: "",
+        participacion: "",
+        negativa: "",
+        telefono: "",
+        redsocial: ""
+      };
     },
     getEntidades() {
       let cObject = this;

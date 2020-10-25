@@ -6,7 +6,10 @@
           Conocimiento para el candidato
         </h5>
         <div class="md-layout">
-          <div class="md-layout-item md-small-size-100 mx-auto" :class="pageSize">
+          <div
+            class="md-layout-item md-small-size-100 mx-auto"
+            :class="pageSize"
+          >
             <div class="md-layout">
               <label
                 class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100 md-form-label"
@@ -34,12 +37,15 @@
                         sendData('participacion', '');
                         negativa = '';
                         sendData('negativa', '');
+                        likeconocer = '';
+                        sendData('likeconocer', '');
                       "
                     >
                       <md-option value="">-- Respuesta --</md-option>
                       <md-option value="SI">SI</md-option>
                       <md-option value="NO">NO</md-option>
                       <md-option value="NO LO CONOZCO">NO LO CONOZCO</md-option>
+                      <md-option value="NO DECIDE">NO DECIDE</md-option>
                     </md-select>
                   </md-field>
                 </ValidationProvider>
@@ -101,6 +107,32 @@
                   >Deseo Esperar</md-radio
                 >
               </div>
+
+              <label
+                v-if="simpatiza == 'NO LO CONOZCO'"
+                class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100 md-form-label"
+              >
+                ¿Le gustaría conocerlo?
+              </label>
+
+              <div
+                v-if="simpatiza == 'NO LO CONOZCO'"
+                class="md-layout-item md-size-65 md-small-size-100 md-medium-size-100"
+              >
+                <md-radio
+                  v-model="likeconocer"
+                  value="SI"
+                  @change="sendData('likeconocer', likeconocer)"
+                  >Si</md-radio
+                >
+                <md-radio
+                  v-model="likeconocer"
+                  @change="sendData('likeconocer', likeconocer)"
+                  value="NO"
+                  class="md-primary"
+                  >No</md-radio
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -117,17 +149,18 @@ import { required } from "vee-validate/dist/rules";
 extend("required", required);
 
 export default {
-  props:{
+  props: {
     pageSize: {
       type: String,
       default: "md-size-70"
-    },
+    }
   },
   data() {
     return {
       simpatiza: "",
       participacion: "",
-      negativa: ""
+      negativa: "",
+      likeconocer: ""
     };
   },
   methods: {
@@ -139,12 +172,15 @@ export default {
         if (!res) {
           return;
         }
-        if (
-          (this.simpatiza == "SI" || this.simpatiza == "NO") &&
-          this.participacion == "" &&
-          this.negativa == ""
-        )
+        if (this.simpatiza == "SI" && this.participacion == "") {
           return Promise.resolve(false);
+        }
+        if (this.simpatiza == "NO" && this.negativa == "") {
+          return Promise.resolve(false);
+        }
+        if (this.simpatiza == "NO LO CONOZCO" && this.likeconocer == "") {
+          return Promise.resolve(false);
+        }
         this.$emit("on-validated", res);
         return res;
       });
