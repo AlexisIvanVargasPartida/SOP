@@ -3,7 +3,7 @@
     md-elevation="0"
     class="md-transparent"
     :class="{
-      'md-toolbar-absolute md-white md-fixed-top': $route.meta.navbarAbsolute
+      'md-toolbar-absolute md-white md-fixed-top': true
     }"
   >
     <div class="md-toolbar-row">

@@ -6,6 +6,7 @@ import Dashboard from "@/pages/SOP/Dashboard.vue";
 import RegistroPoblacion from "@/pages/SOP/RegistroPoblacion.vue";
 import Poblacion from "@/pages/SOP/Poblacion.vue";
 import Graficas from "@/pages/SOP/Graficas.vue";
+import GraficasMunicipio from "@/pages/SOP/GraficasMunicipio.vue";
 import GraficasFiltro from "@/pages/SOP/GraficasFiltro.vue";
 
 import Login from "@/pages/SOP/Authentication/Login.vue";
@@ -95,6 +96,16 @@ const routes = [
         meta: {
           requiresAuth: true,
           title: "SOP | Graficas Filtro",
+          permission: true
+        }
+      },
+      {
+        path: "/graficas/municipio/:municipio",
+        name: "Graficas Municipio",
+        component: GraficasMunicipio,
+        meta: {
+          requiresAuth: true,
+          title: "SOP | Graficas Municipio",
           permission: true
         }
       }

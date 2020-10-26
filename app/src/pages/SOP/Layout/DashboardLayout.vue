@@ -53,6 +53,7 @@
       <div
         :class="{ content: !$route.meta.hideContent }"
         @click="toggleSidebar"
+         style="padding-top: 70px;"
       >
         <zoom-center-transition :duration="200" mode="out-in">
           <!-- your content here -->

@@ -544,7 +544,7 @@ export default {
           cObject.entidadeFederativas = response.data.data;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     getColonias() {
@@ -563,7 +563,7 @@ export default {
           cObject.colonias = response.data.data;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     getColoniasSecciones() {
@@ -580,7 +580,7 @@ export default {
           cObject.secciones = response.data.data;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     generaCE() {

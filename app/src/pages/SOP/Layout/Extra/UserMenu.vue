@@ -32,6 +32,12 @@
                   <span class="sidebar-normal">Configuraciones</span>
                 </a>
               </li>
+              <li>
+                <a @click="logout()">
+                  <span class="sidebar-mini">S</span>
+                  <span class="sidebar-normal">Salir</span>
+                </a>
+              </li>
             </slot>
           </ul>
         </div>
@@ -71,6 +77,22 @@ export default {
     },
     toggleMenu: function() {
       this.isClosed = !this.isClosed;
+    },
+    logout() {
+      let cObject = this;
+      this.$store
+        .dispatch("destroyFetchup")
+        .then(response => {
+          let varRes = response;
+          cObject.$router.push({
+            path: "/login"
+          });
+        })
+        .catch(error => {
+          cObject.$router.push({
+            path: "/login"
+          });
+        });
     }
   }
 };

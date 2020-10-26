@@ -377,7 +377,7 @@ export default {
             cObject.closeSimpatizador();
           })
           .catch(error => {
-            console.log(error.response || error.message);
+            cObject.$helpers.catchError(error);
           });
       }
     },
@@ -428,7 +428,7 @@ export default {
           cObject.getMunicipios();
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     getMunicipios() {
@@ -457,7 +457,7 @@ export default {
           cObject.getSecciones();
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     getSecciones() {
@@ -484,7 +484,7 @@ export default {
           cObject.secciones = response.data.data;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
     getPoblacion(page = 1) {
@@ -517,7 +517,7 @@ export default {
           cObject.loader = false;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     }
   },
@@ -547,7 +547,6 @@ export default {
     currentPage() {
       this.tableData = [];
       this.searchedData = [];
-      console.log("---", this.pagination.currentPage);
       this.getPoblacion(this.pagination.currentPage);
     }
   }

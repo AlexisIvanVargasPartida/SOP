@@ -36,8 +36,7 @@ class Simpatizantes extends Controller
             $claveElector = $request->cve_elector;
             $exist = PadronElectoral::where("cve_elector", "like", $claveElector . "%")->get();
             $claveElector = $claveElector . "000";
-            if ($exist) $claveElector = $exist[0]["cve_elector"];
-
+            if (count($exist)>0) $claveElector = $exist[0]["cve_elector"];
             $row = PadronElectoral::updateOrCreate(['cve_elector' => $claveElector], $data);
             SimpatizantesCandidato::updateOrCreate(
                 [

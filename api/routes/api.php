@@ -37,6 +37,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     
     //GRAFICAS
     Route::get('/candidato/{id}/{entidad}/grafica/municipios/{filter}', 'Graficas@candidatoMunicipios');
+    Route::get('/candidato/{id}/{entidad}/grafica/municipios/{municipio}/{filter}', 'Graficas@candidatoMunicipiosFiltro');
 
     //TEST AUTH
     Route::get('/user/{id}', function (Request $request, $id) {

@@ -1,12 +1,73 @@
 import StoreData from "./store";
+import Notifications from "./components/NotificationPlugin";
 import Vue from "vue";
 import Vuex from "vuex";
 Vue.use(Vuex);
 Vue.use(StoreData);
+Vue.use(Notifications);
 
 const store = new Vuex.Store(StoreData);
+const notifications = new Vuex.Store(Notifications);
 
 export default {
+
+  catchError(error) {
+    const addNotify = notifications._vm.notificationStore;
+    if (error) {
+      if (error.response) {
+        if (error.response.data) {
+          let data = error.response.data;
+          let message = data.error || data.message || data.data || "";
+          let isString = typeof (message) == "object" ? message.message || message.error : message;
+          if (isString.indexOf("Unauthenticated") >= 0) {
+            store.dispatch("destroyFetchup").then(response => {
+              location.reload();
+            }).catch(error => {
+              location.reload();
+            });
+          }
+
+          addNotify.notify({
+            message: isString || "Algo Salió Mal...",
+            icon: 'error_outline',
+            horizontalAlign: "center",
+            verticalAlign: "bottom",
+            type: "warning",
+            timeout: 4500
+          });
+        } else {
+          addNotify.notify({
+            message: error.message || "Algo Salió Mal...",
+            icon: 'error_outline',
+            horizontalAlign: "center",
+            verticalAlign: "bottom",
+            type: "warning",
+            timeout: 4500
+          });
+        }
+      }
+      else {
+        addNotify.notify({
+          message: error.message || "Algo Salió Mal...",
+          icon: 'error_outline',
+          horizontalAlign: "center",
+          verticalAlign: "bottom",
+          type: "warning",
+          timeout: 4500
+        });
+      }
+    }
+    else {
+      addNotify.notify({
+        message: "Algo Salió Mal...",
+        icon: 'error_outline',
+        horizontalAlign: "center",
+        verticalAlign: "bottom",
+        type: "warning",
+        timeout: 4500
+      });
+    }
+  },
   hasPermision(permission) {
     let response =
       store.state.sop.authorization.permissions.indexOf(permission) >= 0

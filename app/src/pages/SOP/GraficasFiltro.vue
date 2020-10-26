@@ -293,12 +293,12 @@ export default {
           cObject.getMunicipios(cObject.entidad);
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     },
-    getMunicipios(idMunicipio) {
+    getMunicipios(idEntidad, page = 1) {
       let cObject = this;
-      if (idMunicipio == null) return;
+      if (idEntidad == null) return;
       this.loader = true;
       axios
         .get(
@@ -306,9 +306,11 @@ export default {
             "candidato/" +
             this.$store.state.sop.user.idcandidato +
             "/" +
-            idMunicipio +
+            idEntidad +
             "/grafica/municipios/" +
-            this.$route.params.filtro,
+            this.$route.params.filtro +
+            "?page=" +
+            page,
           {
             headers: {
               Authorization:
@@ -331,7 +333,7 @@ export default {
           cObject.loader = false;
         })
         .catch(error => {
-          console.log(error.message);
+          cObject.$helpers.catchError(error);
         });
     }
   },
@@ -356,6 +358,13 @@ export default {
     window.getDataMunicipio = this.getDataMunicipio;
     window.getName = this.getName;
     this.getEntidades();
+  },
+  watch: {
+    currentPage() {
+      this.tableData = [];
+      this.searchedData = [];
+      this.getMunicipios(this.entidad, this.pagination.currentPage);
+    }
   }
 };
 </script>

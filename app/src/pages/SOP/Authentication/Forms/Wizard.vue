@@ -118,6 +118,7 @@ export default {
         })
         .catch(error => {
           cObject.asycFinish = false;
+          cObject.$helpers.catchError(error);
         });
     }
   }
