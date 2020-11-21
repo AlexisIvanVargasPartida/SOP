@@ -407,7 +407,11 @@ export default {
     currentPage() {
       this.tableData = [];
       this.searchedData = [];
-      this.getMunicipios(this.entidad, this.$route.params.municipio, this.pagination.currentPage);
+      this.getMunicipios(
+        this.entidad,
+        this.$route.params.municipio,
+        this.pagination.currentPage
+      );
     }
   }
 };

@@ -56,11 +56,7 @@
 </template>
 
 <script>
-import {
-  StatsCard,
-  ChartCard,
-  AnimatedNumber
-} from "@/components";
+import { StatsCard, ChartCard, AnimatedNumber } from "@/components";
 
 export default {
   components: {

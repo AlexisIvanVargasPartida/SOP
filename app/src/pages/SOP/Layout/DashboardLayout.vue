@@ -25,13 +25,25 @@
           ></sidebar-item>
         </sidebar-item>
         <sidebar-item
-          :link="{ name: 'Organigrama', icon: 'filter_list', path: '/organigrama' }"
+          :link="{
+            name: 'Organigrama',
+            icon: 'filter_list',
+            path: '/organigrama'
+          }"
         ></sidebar-item>
         <sidebar-item
-          :link="{ name: 'Gestioria', icon: 'attach_money', path: '/gestioria' }"
+          :link="{
+            name: 'Gestioria',
+            icon: 'attach_money',
+            path: '/gestioria'
+          }"
         ></sidebar-item>
         <sidebar-item
-          :link="{ name: 'Encuesta', icon: 'content_paste', path: '/encuestas' }"
+          :link="{
+            name: 'Encuesta',
+            icon: 'content_paste',
+            path: '/encuestas'
+          }"
         ></sidebar-item>
         <sidebar-item
           :link="{ name: 'Usuarios', icon: 'group', path: '/usuarios' }"
@@ -53,7 +65,7 @@
       <div
         :class="{ content: !$route.meta.hideContent }"
         @click="toggleSidebar"
-         style="padding-top: 70px;"
+        style="padding-top: 70px;"
       >
         <zoom-center-transition :duration="200" mode="out-in">
           <!-- your content here -->

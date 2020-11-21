@@ -2,7 +2,6 @@
 import { APIURL } from "@/api.js";
 import axios from "axios";
 
-
 let configStorage = {
   authorization: {
     token_type: null,
@@ -41,12 +40,10 @@ export default {
 
       return new Promise((resolve, reject) => {
         axios
-          .post(APIURL + "login",
-            {
-              email: credentials.email,
-              password: credentials.password
-            }
-          )
+          .post(APIURL + "login", {
+            email: credentials.email,
+            password: credentials.password
+          })
           .then(response => {
             data.authorization.token_type = response.data.token_type;
             data.authorization.token = response.data.access_token;
@@ -74,8 +71,7 @@ export default {
           axios
             .get(APIURL + "logout", {
               headers: {
-                Authorization:
-                  "Bearer " + context.state.sop.authorization.token
+                Authorization: "Bearer " + context.state.sop.authorization.token
               }
             })
             .then(response => {

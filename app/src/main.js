@@ -13,6 +13,7 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import StoreData from "./store";
 import helpers from "./helpers";
+import "./registerServiceWorker";
 
 Vue.use(VueRouter);
 Vue.use(DashboardPlugin);
@@ -25,7 +26,7 @@ Vue.prototype.$helpers = helpers;
 
 const store = new Vuex.Store(StoreData);
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   routes,
   scrollBehavior: to => {
     if (to.hash) {
@@ -42,7 +43,9 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.loggedIn) {
       next({ path: "/login" });
     } else {
-      if (to.matched[1].meta.permission == true || helpers.hasPermision(to.matched[1].meta.permission) == true
+      if (
+        to.matched[1].meta.permission == true ||
+        helpers.hasPermision(to.matched[1].meta.permission) == true
       ) {
         next();
       } else {

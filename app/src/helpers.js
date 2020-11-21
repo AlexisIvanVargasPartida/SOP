@@ -10,7 +10,6 @@ const store = new Vuex.Store(StoreData);
 const notifications = new Vuex.Store(Notifications);
 
 export default {
-
   catchError(error) {
     const addNotify = notifications._vm.notificationStore;
     if (error) {
@@ -18,18 +17,24 @@ export default {
         if (error.response.data) {
           let data = error.response.data;
           let message = data.error || data.message || data.data || "";
-          let isString = typeof (message) == "object" ? message.message || message.error : message;
+          let isString =
+            typeof message == "object"
+              ? message.message || message.error
+              : message;
           if (isString.indexOf("Unauthenticated") >= 0) {
-            store.dispatch("destroyFetchup").then(response => {
-              location.reload();
-            }).catch(error => {
-              location.reload();
-            });
+            store
+              .dispatch("destroyFetchup")
+              .then(response => {
+                location.reload();
+              })
+              .catch(error => {
+                location.reload();
+              });
           }
 
           addNotify.notify({
             message: isString || "Algo Salió Mal...",
-            icon: 'error_outline',
+            icon: "error_outline",
             horizontalAlign: "center",
             verticalAlign: "bottom",
             type: "warning",
@@ -38,29 +43,27 @@ export default {
         } else {
           addNotify.notify({
             message: error.message || "Algo Salió Mal...",
-            icon: 'error_outline',
+            icon: "error_outline",
             horizontalAlign: "center",
             verticalAlign: "bottom",
             type: "warning",
             timeout: 4500
           });
         }
-      }
-      else {
+      } else {
         addNotify.notify({
           message: error.message || "Algo Salió Mal...",
-          icon: 'error_outline',
+          icon: "error_outline",
           horizontalAlign: "center",
           verticalAlign: "bottom",
           type: "warning",
           timeout: 4500
         });
       }
-    }
-    else {
+    } else {
       addNotify.notify({
         message: "Algo Salió Mal...",
-        icon: 'error_outline',
+        icon: "error_outline",
         horizontalAlign: "center",
         verticalAlign: "bottom",
         type: "warning",

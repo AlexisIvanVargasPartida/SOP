@@ -6,8 +6,8 @@
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev": "npm run serve",
     "deploy": "npm run build && cd docs && npm run build && cd .. && sudo gh-pages -d dist",
+    "dev": "npm run serve",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm run dev"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "moment": "2.24.0",
     "nouislider": "14.1.1",
     "perfect-scrollbar": "1.5.0",
+    "register-service-worker": "^1.7.1",
     "sweetalert2": "9.10.0",
     "vee-validate": "3.2.5",
     "vue": "2.6.11",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "4.2.3",
     "@vue/cli-plugin-eslint": "4.2.3",
+    "@vue/cli-plugin-pwa": "^4.5.8",
     "@vue/cli-plugin-router": "4.2.3",
     "@vue/cli-service": "4.2.3",
     "@vue/eslint-config-prettier": "6.0.0",
@@ -58,6 +60,7 @@
     "prettier": "1.19.1",
     "sass": "1.26.2",
     "sass-loader": "8.0.2",
+    "sw-precache-webpack-plugin": "^1.0.0",
     "vue-template-compiler": "2.6.11"
   }
 }
