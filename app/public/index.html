@@ -37,5 +37,19 @@
   <div id="app"></div>
   <!-- built files will be auto injected -->
 </body>
+<script>
+  function masterFunction(key, x, data = null) {
+    switch (key) {
+      case "error":
+        console.log(x);
+        break;
+      case "warn":
+        console.log(x);
+        break;
+      default:
+        break;
+    }
+  }
+</script>
 
 </html>

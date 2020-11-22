@@ -125,4 +125,26 @@ class Graficas extends Controller
             ->paginate(15);
         return $data;
     }
+
+    public function consultaSimpatizantesDataSeccion(Request $request, $id, $entidad, $municipio_id, $seccion_id, $filter)
+    {
+        $seccion =  DB::table('secciones')->find($seccion_id);
+        if (!$seccion) return response()->json(["data" => "Error de datos!"], 401);
+        $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($id) {
+            $join->on("sc.padronelectoral_id", "padronelectoral.id")
+                ->where("sc.candidato_id", $id);
+        })
+            ->where("entidad", $entidad)
+            ->where('municipio', $municipio_id)
+            ->where('seccion', $seccion->seccion)
+            ->when($filter != "all", function ($q) use ($filter) {
+                return $q->where("sc.simpatiza", $filter);
+            })
+            ->when($filter == "all", function ($q) {
+                return $q->where("sc.simpatiza", "<>", null);
+            })
+            ->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.data", "sc.created_at as fechacaptura")
+            ->paginate(15);
+        return $data;
+    }
 }

@@ -10,39 +10,50 @@
       <!--<mobile-menu></mobile-menu>-->
       <template slot="links">
         <sidebar-item
-          :link="{ name: 'Tablero', icon: 'dashboard', path: '/dashboard' }"
+          :link="{
+            name: 'Tablero',
+            icon: 'dashboard',
+            path: '/dashboard',
+            view: true,
+          }"
         >
         </sidebar-item>
-        <sidebar-item :link="{ name: 'Simpatizantes', icon: 'person_add' }">
+        <sidebar-item
+          :link="{ name: 'Simpatizantes', icon: 'person_add', view: true }"
+        >
           <sidebar-item
-            :link="{ name: 'Registro Población', path: '/poblacion/registro' }"
+            :link="{
+              name: 'Registro Población',
+              path: '/poblacion/registro',
+              view: true,
+            }"
           ></sidebar-item>
           <sidebar-item
-            :link="{ name: 'Población', path: '/poblacion' }"
+            :link="{ name: 'Población', path: '/poblacion', view: true }"
           ></sidebar-item>
           <sidebar-item
-            :link="{ name: 'Graficas', path: '/graficas' }"
+            :link="{ name: 'Graficas', path: '/graficas', view: true }"
           ></sidebar-item>
         </sidebar-item>
         <sidebar-item
           :link="{
             name: 'Organigrama',
             icon: 'filter_list',
-            path: '/organigrama'
+            path: '/organigrama',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
             name: 'Gestioria',
             icon: 'attach_money',
-            path: '/gestioria'
+            path: '/gestioria',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
             name: 'Encuesta',
             icon: 'content_paste',
-            path: '/encuestas'
+            path: '/encuestas',
           }"
         ></sidebar-item>
         <sidebar-item
@@ -54,6 +65,7 @@
       <top-navbar></top-navbar>
 
       <fixed-plugin
+        v-if="1 == 2"
         :color.sync="sidebarBackground"
         :colorBg.sync="sidebarBackgroundColor"
         :sidebarMini.sync="sidebarMini"
@@ -61,11 +73,13 @@
         :image.sync="sidebarBackgroundImage"
       >
       </fixed-plugin>
-
+      <div v-if="!$store.state.status" class="offline">
+        <a><md-icon style="margin-top: 13px">wifi_off</md-icon></a>
+      </div>
       <div
         :class="{ content: !$route.meta.hideContent }"
         @click="toggleSidebar"
-        style="padding-top: 70px;"
+        style="padding-top: 70px"
       >
         <zoom-center-transition :duration="200" mode="out-in">
           <!-- your content here -->
@@ -126,7 +140,7 @@ export default {
     FixedPlugin,
     //MobileMenu,
     UserMenu,
-    ZoomCenterTransition
+    ZoomCenterTransition,
   },
   data() {
     return {
@@ -134,7 +148,7 @@ export default {
       sidebarBackground: "green",
       sidebarBackgroundImage: "../../img/sidebar-2.jpg",
       sidebarMini: true,
-      sidebarImg: false
+      sidebarImg: false,
     };
   },
   methods: {
@@ -147,7 +161,14 @@ export default {
       if (this.$sidebar) {
         this.$sidebar.toggleMinimize();
       }
-    }
+    },
+  },
+  created() {
+    window.addEventListener(
+      "offline",
+      () => (this.$store.state.status = false)
+    );
+    window.addEventListener("online", () => (this.$store.state.status = true));
   },
   updated() {
     reinitScrollbar();
@@ -158,8 +179,8 @@ export default {
   watch: {
     sidebarMini() {
       this.minimizeSidebar();
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -187,5 +208,16 @@ $scaleSize: 0.95;
 }
 .main-panel .zoomOut {
   animation-name: zoomOut95;
+}
+.offline {
+  position: fixed;
+  right: 0;
+  width: 64px;
+  height: 45px;
+  background: rgb(197 9 9 / 59%);
+  z-index: 1031;
+  border-radius: 8px 0 0 0px;
+  text-align: center;
+  top: calc(100vh - 45px);
 }
 </style>

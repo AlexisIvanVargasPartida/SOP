@@ -61,6 +61,17 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+
+if (process.env.NODE_ENV === "production") {
+  //Vue.config.silent = true;
+  Vue.config.errorHandler = function (err, vm, info) {
+    masterFunction("error", "Error: " + err.message || "-");
+  };
+  Vue.config.warnHandler = function (warn, vm, info) {
+    masterFunction("warn", "Warning: " + warn.message || "-");
+  };
+}
+
 /* eslint-disable no-new */
 new Vue({
   el: "#app",

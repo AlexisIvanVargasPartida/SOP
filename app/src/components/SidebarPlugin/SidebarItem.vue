@@ -2,7 +2,7 @@
   <component
     :is="baseComponent"
     :to="link.path ? link.path : '/'"
-    :class="{ active: isActive }"
+    :class="{ active: isActive, isDisabled: !link.view }"
     tag="li"
   >
     <a

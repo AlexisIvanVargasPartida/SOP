@@ -1,5 +1,5 @@
 {
-  "name": "vue-material-dashboard-pro",
+  "name": "sop",
   "version": "1.4.0",
   "private": true,
   "scripts": {
@@ -60,7 +60,6 @@
     "prettier": "1.19.1",
     "sass": "1.26.2",
     "sass-loader": "8.0.2",
-    "sw-precache-webpack-plugin": "^1.0.0",
     "vue-template-compiler": "2.6.11"
   }
 }

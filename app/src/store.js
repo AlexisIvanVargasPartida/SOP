@@ -18,6 +18,7 @@ let configStorage = {
 
 export default {
   state: {
+    status: true,
     sop:
       localStorage.DataSOP == null
         ? configStorage

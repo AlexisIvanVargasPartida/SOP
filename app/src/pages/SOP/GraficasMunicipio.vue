@@ -97,6 +97,22 @@
     <div class="md-layout-item md-size-100">
       <md-card>
         <md-card-content>
+          <md-field style="width: 18%">
+            <label for="secciones">Secciónes</label>
+            <md-select
+              v-model="seccion"
+              name="secciones"
+              @input="getPoblacion()"
+            >
+              <md-option
+                v-for="item in secciones"
+                :key="item.id"
+                :value="item.id"
+              >
+                Sección {{ item.seccion }}
+              </md-option>
+            </md-select>
+          </md-field>
           <md-table
             :value="queriedData"
             class="paginated-table table-striped table-hover"
@@ -120,7 +136,7 @@
             <md-progress-bar
               md-mode="indeterminate"
               v-if="loader"
-              style="margin-top:15px"
+              style="margin-top: 15px"
             ></md-progress-bar>
             <md-table-row slot="md-table-row" slot-scope="{ item }">
               <md-table-cell md-label="Nombre" md-sort-by="name"
@@ -201,7 +217,7 @@ export default {
   components: {
     StatsCard,
     Pagination,
-    highcharts: Chart
+    highcharts: Chart,
   },
   computed: {
     simpatizan() {
@@ -245,69 +261,71 @@ export default {
     },
     currentPage() {
       return this.pagination.currentPage;
-    }
+    },
   },
   data() {
     return {
       chartOptions: {
         chart: {
           renderTo: "container",
-          type: "bar"
+          type: "bar",
         },
         title: {
           text:
             (this.$store.state.sop.user.candidato || "Simaptizantes") +
-            " | Población Simpatizantes"
+            " | Población Simpatizantes",
         },
         xAxis: {
           categories: ["SOP"],
           scrollbar: {
-            enabled: true
+            enabled: true,
           },
           labels: {
             useHTML: true,
-            formatter: function() {
+            formatter: function () {
               return getName(this.value);
-            }
-          }
+            },
+          },
         },
         yAxis: {
           allowDecimals: false,
           title: {
-            text: "Total Registros Población"
+            text: "Total Registros Población",
           },
           events: {
-            click: function() {
+            click: function () {
               console.log(this);
-            }
-          }
+            },
+          },
         },
         plotOptions: {
           series: {
             stacking: "normal",
-            cursor: "pointer"
-          }
+            cursor: "pointer",
+          },
         },
         series: [
           {
             name: "Simpatizan",
-            data: [0]
+            data: [0],
           },
           {
             name: "No Simpatizan",
-            data: [0]
+            data: [0],
           },
           {
             name: "No nos conocen",
-            data: [0]
+            data: [0],
           },
           {
             name: "No deciden",
-            data: [0]
-          }
-        ]
+            data: [0],
+          },
+        ],
       },
       entidades: [],
+      secciones: [],
+      seccion: null,
       entidad: null,
       categorias: [],
 
@@ -315,10 +333,10 @@ export default {
       currentSort: "nombre",
       currentSortOrder: "asc",
       pagination: {
-        perPage: 10,
+        perPage: 15,
         currentPage: 1,
-        perPageOptions: [5, 10, 25, 50],
-        total: 0
+        perPageOptions: [5, 10, 15, 25, 50],
+        total: 0,
       },
       footerTable: [
         "Nombre",
@@ -327,17 +345,17 @@ export default {
         "Colonia",
         "CP",
         "Sección",
-        "Acciónes"
+        "Acciónes",
       ],
       searchQuery: "",
       propsToSearch: ["nombre", "paterno"],
       tableData: [],
       searchedData: [],
-      fuseSearch: null
+      fuseSearch: null,
     };
   },
   methods: {
-    getName: function(item) {
+    getName: function (item) {
       return this.categorias[item];
     },
     getMunicipios(idEntidad, idMunicipio, page = 1) {
@@ -357,11 +375,11 @@ export default {
           {
             headers: {
               Authorization:
-                "Bearer " + this.$store.state.sop.authorization.token
-            }
+                "Bearer " + this.$store.state.sop.authorization.token,
+            },
           }
         )
-        .then(response => {
+        .then((response) => {
           cObject.categorias = response.data.data.idMunicipios;
           cObject.chartOptions.xAxis.categories = response.data.data.Municipios;
           cObject.tableData = response.data.data.poblacion[0].data;
@@ -370,32 +388,98 @@ export default {
           cObject.chartOptions.series = [
             {
               name: "No deciden",
-              data: response.data.data.NoDecide
+              data: response.data.data.NoDecide,
             },
             {
               name: "No nos conocen",
-              data: response.data.data.NoNosConoce
+              data: response.data.data.NoNosConoce,
             },
             {
               name: "No Simpatizan",
-              data: response.data.data.NoSimpatiza
+              data: response.data.data.NoSimpatiza,
             },
             {
               name: "Simpatizan",
-              data: response.data.data.Simpatizantes
-            }
+              data: response.data.data.Simpatizantes,
+            },
           ];
         })
-        .catch(error => {
+        .catch((error) => {
           cObject.$helpers.catchError(error);
         });
-    }
+    },
+    getSecciones(idEntidad, idMunicipio) {
+      let cObject = this;
+      if (idMunicipio == null || idEntidad == null) return;
+      axios
+        .get(
+          APIURL +
+            "candidato/" +
+            this.$store.state.sop.user.idcandidato +
+            "/" +
+            idEntidad +
+            "/" +
+            idMunicipio +
+            "/secciones",
+          {
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token,
+            },
+          }
+        )
+        .then((response) => {
+          cObject.secciones = response.data.data;
+        })
+        .catch((error) => {
+          cObject.$helpers.catchError(error);
+        });
+    },
+    getPoblacion(page = 1) {
+      let cObject = this;
+      if (this.seccion == null) return;
+      this.tableData = [];
+      this.searchedData = [];
+      this.loader = true;
+      axios
+        .get(
+          APIURL +
+            "candidato/" +
+            this.$store.state.sop.user.idcandidato +
+            "/" +
+            this.$route.params.entidad +
+            "/" +
+            this.$route.params.municipio +
+            "/" +
+            this.seccion +
+            "/graficas/all?page=" +
+            page,
+          {
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token,
+            },
+          }
+        )
+        .then((response) => {
+          cObject.tableData = response.data.data;
+          cObject.pagination.total = response.data.total;
+          cObject.loader = false;
+        })
+        .catch((error) => {
+          cObject.$helpers.catchError(error);
+        });
+    },
   },
   created() {
     window.getName = this.getName;
     if (this.$route.params.entidad && this.$route.params.municipio) {
       this.entidad = this.$route.params.entidad;
       this.getMunicipios(
+        this.$route.params.entidad,
+        this.$route.params.municipio
+      );
+      this.getSecciones(
         this.$route.params.entidad,
         this.$route.params.municipio
       );
@@ -412,8 +496,9 @@ export default {
         this.$route.params.municipio,
         this.pagination.currentPage
       );
-    }
-  }
+      this.getSecciones(this.entidad, this.$route.params.municipio);
+    },
+  },
 };
 </script>
 <style>

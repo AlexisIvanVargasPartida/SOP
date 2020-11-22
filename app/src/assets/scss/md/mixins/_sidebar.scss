@@ -61,4 +61,24 @@
           transition: none;
         }
     }
+    
+    li.isDisabled {
+        pointer-events: none;
+    }
+    li.isDisabled > a:not([data-toggle="collapse"]) {
+        background-color: #adadad;
+        @include shadow-big-color(#adadad);
+
+        p {
+            color: white !important;
+        }
+        span {
+            color: white !important;
+        }
+        .md-icon.md-theme-default.md-icon-font {
+            color: $white-color !important;
+            opacity: 1;
+            transition: none;
+        }
+    }
 }
