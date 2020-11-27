@@ -108,7 +108,7 @@ export default {
     highcharts: Chart
   },
   computed: {
-    simpatizan() {
+   simpatizan() {
       let data = this.chartOptions.series[3].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
@@ -130,7 +130,7 @@ export default {
       chartOptions: {
         chart: {
           renderTo: "container",
-          type: "area",
+          type: "column",
           panning: true
         },
         title: {
@@ -140,7 +140,7 @@ export default {
         },
         xAxis: {
           categories: ["SOP"],
-          max: 6,
+          max: 0,
           scrollbar: {
             enabled: true
           },
@@ -169,24 +169,19 @@ export default {
             }
           }
         },
+        tooltip: {
+        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y} personas</b></td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+        },
         plotOptions: {
-          series: {
-            stacking: "normal",
-            cursor: "pointer",
-            dataLabels: {
-              enabled: false
-            },
-            marker: {
-              enabled: false
-            },
-            point: {
-              events: {
-                click: function() {
-                  console.log(this.series.userOptions.name, "--");
-                }
-              }
-            }
-          }
+        column: {
+            pointPadding: 0.2,
+            borderWidth: 0
+        }
         },
         series: [
           {
@@ -198,7 +193,7 @@ export default {
             data: [0]
           },
           {
-            name: "No nos conocen",
+            name: "No  conocen",
             data: [0]
           },
           {

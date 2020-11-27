@@ -268,7 +268,7 @@ export default {
       chartOptions: {
         chart: {
           renderTo: "container",
-          type: "bar",
+          type: "column",
         },
         title: {
           text:
@@ -298,11 +298,19 @@ export default {
             },
           },
         },
+        tooltip: {
+        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y} personas</b></td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+        },
         plotOptions: {
-          series: {
-            stacking: "normal",
-            cursor: "pointer",
-          },
+        column: {
+            pointPadding: 0.2,
+            borderWidth: 0
+        }
         },
         series: [
           {
