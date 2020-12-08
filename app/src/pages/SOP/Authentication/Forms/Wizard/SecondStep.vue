@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       values: null,
-      options: null
+      options: null,
     };
   },
   methods: {
@@ -72,8 +72,9 @@ export default {
     },
     getCategories() {
       return new Promise((resolve, reject) => {
+       
         axios
-          .get(APIURL + "registro/entidades", {})
+          .get(APIURL + "registro/entidades", {}) 
           .then(response => {
             resolve(response);
           })
@@ -82,6 +83,7 @@ export default {
           });
       });
     },
+
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
     },
@@ -100,6 +102,9 @@ export default {
   }
 };
 </script>
+
+
+
 <style lang="scss">
 .vue-treeselect__menu {
   max-height: 200px !important;
@@ -109,3 +114,4 @@ export default {
   display: none;
 }
 </style>
+    

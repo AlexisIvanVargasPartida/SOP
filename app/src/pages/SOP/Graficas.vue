@@ -86,6 +86,51 @@
         </template>
       </stats-card>
     </div>
+    <div
+      class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
+      :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
+    >
+      <md-card>
+        <md-card-header class="md-card-header-icon md-card-header-green">
+          <h4 class="title">Municipio</h4>
+        </md-card-header>
+
+        <md-card-content>
+          <md-field>
+            <label for="municipios">Municipio</label>
+            <md-select
+              v-model="selmunicipio"
+              name="municipio"
+              id="municipio"
+              @input="selected()"
+              ><md-option
+                v-for="mun in selMunicipios"
+                :key="mun.id"
+                :value="mun.clave_municipio"
+                >{{ mun.nombre }}</md-option
+              >
+            </md-select>
+          </md-field>
+        </md-card-content>
+      </md-card>
+    </div>
+
+    <div
+      class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
+      :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
+    >
+      <md-button class="md-icon-button" @click="previous">
+        <md-icon>keyboard_arrow_left</md-icon>
+      </md-button>
+      <md-button class="md-icon-button" @click="next">
+        <md-icon>keyboard_arrow_right</md-icon>
+      </md-button>
+      <md-progress-bar
+        md-mode="determinate"
+        :md-value="amount"
+        class="md-success"
+      ></md-progress-bar>
+    </div>
 
     <div class="md-layout-item md-size-100">
       <md-card>
@@ -105,10 +150,10 @@ import { Chart } from "highcharts-vue";
 export default {
   components: {
     StatsCard,
-    highcharts: Chart
+    highcharts: Chart,
   },
   computed: {
-   simpatizan() {
+    simpatizan() {
       let data = this.chartOptions.series[3].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
     },
@@ -123,27 +168,33 @@ export default {
     nodeciden() {
       let data = this.chartOptions.series[0].data;
       return data ? data.reduce((a, b) => a + b, 0) : 0;
-    }
+    },
   },
   data() {
     return {
+      pageactual: 1,
+      pages: 1,
+      selMunicipios: [],
+      selmunicipio: 0,
+      amount: 1,
+      secciones: [],
+
       chartOptions: {
         chart: {
           renderTo: "container",
           type: "column",
-          panning: true
+          panning: true,
         },
         title: {
           text:
             (this.$store.state.sop.user.candidato || "Simaptizantes") +
-            " | Población Simpatizantes"
+            " | Población Simpatizantes",
         },
         xAxis: {
-          categories: ["SOP"],
-          max: 0,
+          categories: ["SECCIONES"],
           scrollbar: {
-            enabled: true
-          },
+            enabled: true,
+          } /* 
           labels: {
             useHTML: true,
             formatter: function() {
@@ -155,66 +206,102 @@ export default {
                 "</button>"
               );
             }
-          }
+          } */,
         },
         yAxis: {
           min: 0,
           allowDecimals: false,
           title: {
-            text: "Total Registros Población"
+            text: "Total Registros Población",
           },
           events: {
-            click: function() {
+            click: function () {
               console.log(this);
-            }
-          }
+            },
+          },
         },
         tooltip: {
-        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+          headerFormat:
+            '<span style="font-size:10px">{point.key}</span><table>',
+          pointFormat:
+            '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
             '<td style="padding:0"><b>{point.y} personas</b></td></tr>',
-        footerFormat: '</table>',
-        shared: true,
-        useHTML: true
+          footerFormat: "</table>",
+          shared: true,
+          useHTML: true,
         },
         plotOptions: {
-        column: {
+          column: {
             pointPadding: 0.2,
-            borderWidth: 0
-        }
+            borderWidth: 0,
+          },
         },
         series: [
           {
             name: "Simpatizan",
-            data: [0]
+            data: [0],
           },
           {
             name: "No Simpatizan",
-            data: [0]
+            data: [0],
           },
           {
             name: "No  conocen",
-            data: [0]
+            data: [0],
           },
           {
             name: "No deciden",
-            data: [0]
-          }
-        ]
+            data: [0],
+          },
+        ],
       },
       entidades: [],
       entidad: null,
-      categorias: []
+      categorias: [],
     };
   },
   methods: {
-    getDataMunicipio: function(data) {
+    next: function () {
+      let cObject = this;
+      cObject.pageactual = cObject.pageactual + 1;
+      cObject.amount = cObject.pageactual * (100 / cObject.pages);
+      if (cObject.pageactual <= cObject.pages) {
+        location.replace(
+          "/graficas?page=" +
+            cObject.pageactual +
+            "&municipio=" +
+            cObject.selmunicipio
+        );
+      } else {
+        cObject.pageactual = cObject.pages;
+      }
+    },
+    previous: function () {
+      let cObject = this;
+      cObject.pageactual = cObject.pageactual - 1;
+      cObject.amount = cObject.pageactual * (100 / cObject.pages);
+      if (cObject.pageactual > 1) {
+        location.replace(
+          "/graficas?page=" +
+            cObject.pageactual +
+            "&municipio=" +
+            cObject.selmunicipio
+        );
+      } else {
+        cObject.pageactual = 1;
+      }
+    },
+    selected: function () {
+      let cObject = this;
+      cObject.getSelSeccion(cObject.selmunicipio);
+    },
+    getDataMunicipio: function (data) {
       this.$router.push({
         name: "Graficas Municipio",
-        params: { municipio: data, entidad: this.entidad }
+        params: { municipio: data, entidad: this.entidad },
       });
     },
-    getName: function(item) {
+    getName: function (item) {
       return this.categorias[item];
     },
     getEntidades() {
@@ -228,21 +315,25 @@ export default {
           {
             headers: {
               Authorization:
-                "Bearer " + this.$store.state.sop.authorization.token
-            }
+                "Bearer " + this.$store.state.sop.authorization.token,
+            },
           }
         )
-        .then(response => {
+        .then((response) => {
           cObject.entidades = response.data.data;
           if (cObject.entidades.length > 0)
             cObject.entidad = cObject.entidades[0].id;
           cObject.getMunicipios();
+          cObject.getSelMunicipios();
+          cObject.executeSearch();
+          cObject.amount = cObject.pageactual * (cObject.pages / 10);
         })
-        .catch(error => {
+        .catch((error) => {
           cObject.$helpers.catchError(error);
         });
     },
     getMunicipios() {
+      /*
       let cObject = this;
       if (this.entidad == null) return;
       axios
@@ -262,7 +353,7 @@ export default {
         )
         .then(response => {
           cObject.categorias = response.data.data.idMunicipios;
-          cObject.chartOptions.xAxis.categories = response.data.data.Municipios;
+          //cObject.chartOptions.xAxis.categories = response.data.data.Municipios;
 
           cObject.chartOptions.series = [
             {
@@ -285,18 +376,153 @@ export default {
         })
         .catch(error => {
           cObject.$helpers.catchError(error);
+        });*/
+    },
+    getSelMunicipios() {
+      let cObject = this;
+      axios
+        .get(APIURL + "get/municipios/" + cObject.entidad, {
+          headers: {
+            Authorization:
+              "Bearer " + this.$store.state.sop.authorization.token,
+          },
+        })
+        .then((response) => {
+          cObject.selMunicipios = response.data;
+          const queryString = window.location.search;
+          const urlParams = new URLSearchParams(queryString);
+          const municipio = urlParams.get("municipio");
+          cObject.selmunicipio = municipio;
+        })
+        .catch((error) => {
+          cObject.$helpers.catchError(error);
         });
-    }
+    },
+    getSelSeccion(municipio) {
+      let cObject = this;
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const page = urlParams.get("page");
+      const mun = urlParams.get("municipio");
+      if (mun == municipio) {
+        return;
+      }
+      axios
+        .get(
+          APIURL +
+            "get/secciones/" +
+            this.entidad +
+            "/" +
+            municipio +
+            "/" +
+            this.$store.state.sop.user.idcandidato,
+          {
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token,
+            },
+          }
+        )
+        .then((response) => {
+          cObject.secciones = response.data;
+          cObject.chartOptions.xAxis.categories = response.data.secciones;
+          cObject.pages = response.data.pages;
+          cObject.amount = page * (100 / cObject.pages);
+          cObject.chartOptions.series = [
+            {
+              name: "No deciden",
+              data: response.data.nd,
+            },
+            {
+              name: "No nos conocen",
+              data: response.data.nnc,
+            },
+            {
+              name: "No Simpatizan",
+              data: response.data.ns,
+            },
+            {
+              name: "Simpatizan",
+              data: response.data.s,
+            },
+          ];
+        })
+        .catch((error) => {
+          cObject.$helpers.catchError(error);
+        });
+    },
+    executeSearch: function () {
+      let cObject = this;
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const page = urlParams.get("page");
+      const municipio = urlParams.get("municipio");
+      cObject.pageactual = page;
+
+      if (page != null && municipio != null) {
+        axios
+          .get(
+            APIURL +
+              "get/secciones/" +
+              this.entidad +
+              "/" +
+              municipio +
+              "/" +
+              this.$store.state.sop.user.idcandidato +
+              "?page=" +
+              page,
+            {
+              headers: {
+                Authorization:
+                  "Bearer " + this.$store.state.sop.authorization.token,
+              },
+            }
+          )
+          .then((response) => {
+            cObject.secciones = response.data;
+            cObject.chartOptions.xAxis.categories = response.data.secciones;
+            console.log(response.data);
+            cObject.pages = response.data.pages;
+            cObject.amount = page * (100 / cObject.pages);
+            cObject.chartOptions.series = [
+              {
+                name: "No deciden",
+                data: response.data.nd,
+              },
+              {
+                name: "No nos conocen",
+                data: response.data.nnc,
+              },
+              {
+                name: "No Simpatizan",
+                data: response.data.ns,
+              },
+              {
+                name: "Simpatizan",
+                data: response.data.s,
+              },
+            ];
+          })
+          .catch((error) => {
+            cObject.$helpers.catchError(error);
+          });
+      }
+    },
   },
   created() {
     window.getDataMunicipio = this.getDataMunicipio;
     window.getName = this.getName;
     this.getEntidades();
-  }
+  },
+  mounted: function () {},
 };
 </script>
-<style>
+<style >
 .highcharts-credits {
   display: none;
 }
 </style>
+
+
+
+ 

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
-
+use App\Http\Resources\EntidadesMunicipales;
 class EntidadesFederales extends JsonResource
 {
     /**
@@ -14,11 +14,11 @@ class EntidadesFederales extends JsonResource
      * @return array
      */
     public function toArray($request)
-    {
+    {   $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label','id as idmun']);
         return [
             'id' => $this->id,
             'label' => $this->nombre,
-            'children' => DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label'])
+            'children' => EntidadesMunicipales::collection($temp)
         ];
     }
 }

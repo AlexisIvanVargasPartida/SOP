@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Candidato;
 use App\Http\Resources\EntidadesFederales;
+use App\Http\Resources\EntidadesMunicipales;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,8 @@ class Registro extends Controller
     {
         $entidades = DB::table('entidades_federales')->select('id', 'nombre as text', DB::raw('(select "#") as parent'))->get()->toArray();
         $municipios = DB::table('municipios')->select(DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as text', 'clave_entidad_federal as parent')->get()->toArray();
-        $data = array_merge($entidades, $municipios);
+        $secciones=DB::table('secciones')->select(DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'),'seccion as number', 'tipo as text', 'clave_municipio as parent')->get()->toArray();
+        $data = array_merge($entidades,$municipios,$secciones);
         return response()->json($data);
     }
 
@@ -46,6 +48,15 @@ class Registro extends Controller
         $entidades = DB::table('entidades_federales')->get();
         return EntidadesFederales::collection($entidades);
     }
+
+
+    public function entidadesSecciones()
+    {
+        $municipios = DB::table('municipios')->get();
+        return EntidadesMunicipales::collection($municipios);
+    }
+  
+  
 
     public function generaArrayRegistros($values)
     {
