@@ -259,7 +259,7 @@
                       v-model="ce"
                       type="text"
                       @change="sendData('ce', ce)"
-                      disabled
+                     
                     >
                     </md-input>
                   </md-field>

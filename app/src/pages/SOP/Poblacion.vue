@@ -115,7 +115,8 @@
                   clearable
                   style="width: 200px"
                   placeholder="Search records"
-                  v-model="searchQuery"
+                  v-model="query"
+                  @keyup.enter="filter"
                 >
                 </md-input>
               </md-field>
@@ -127,24 +128,27 @@
               style="margin-top:15px"
             ></md-progress-bar>
             <md-table-row slot="md-table-row" slot-scope="{ item }">
-              <md-table-cell md-label="Nombre" md-sort-by="name"
+              <md-table-cell md-label="Nombre" md-sort-by="name" 
                 >{{ item.nombre }} {{ item.paterno }}
                 {{ item.materno }}</md-table-cell
               >
-              <md-table-cell md-label="Calle" md-sort-by="email">{{
+              <md-table-cell md-label="Clave Elector" width="1000px" md-sort-by="cve_elector" >{{
+                item.cve_elector
+              }}</md-table-cell>
+              <md-table-cell md-label="Calle" md-sort-by="email"  align="center">{{
                 item.calle
               }}</md-table-cell>
-              <md-table-cell md-label="Número">{{
+              <md-table-cell md-label="Número" >{{
                 item.num_ext
               }}</md-table-cell>
-              <md-table-cell md-label="Colonia">{{
+              <md-table-cell md-label="Colonia" >{{
                 item.colonia
               }}</md-table-cell>
               <md-table-cell md-label="CP">{{ item.cp }}</md-table-cell>
-              <md-table-cell md-label="Sección">{{
+              <md-table-cell md-label="Sección" >{{
                 item.seccion
               }}</md-table-cell>
-              <md-table-cell md-label="Acciónes">
+              <md-table-cell md-label="Acciónes" >
                 <md-button
                   v-if="!item.simpatiza"
                   class="md-just-icon md-warning md-simple"
@@ -285,6 +289,9 @@ export default {
   },
   data() {
     return {
+      todos:[],
+      query:"",
+      deshabilitada:false,
       asycFinish: false,
       currentSort: "nombre",
       currentSortOrder: "asc",
@@ -296,6 +303,7 @@ export default {
       },
       footerTable: [
         "Nombre",
+        "Clave Elector",
         "Calle",
         "Número",
         "Colonia",
@@ -481,7 +489,19 @@ export default {
           }
         )
         .then(response => {
-          cObject.secciones = response.data.data;
+          let data=response.data;
+          if(data.coordinador){
+            cObject.secciones=data.data;
+            cObject.seccion=data.seccion;
+            document.getElementById("seccion").disabled=true;
+            cObject.deshabilitada=data.coordinador;
+          }else{
+            cObject.secciones=data.data;
+            cObject.deshabilitada=data.coordinador;
+            document.getElementById("seccion").disabled=false;
+
+
+          }
         })
         .catch(error => {
           cObject.$helpers.catchError(error);
@@ -503,7 +523,7 @@ export default {
             "/" +
             this.seccion +
             "/poblacion?page=" +
-            page,
+            page+"&busqueda=null",
           {
             headers: {
               Authorization:
@@ -513,13 +533,51 @@ export default {
         )
         .then(response => {
           cObject.tableData = response.data.data.data;
+          cObject.todos = response.data.data.data;
           cObject.pagination.total = response.data.data.total;
           cObject.loader = false;
         })
         .catch(error => {
           cObject.$helpers.catchError(error);
         });
-    }
+    },
+    filter(page = 1) {
+      let cObject = this;
+      this.loader = true;
+      if (this.seccion == null) return;
+      axios
+        .get(
+          APIURL +
+            "candidato/" +
+            this.$store.state.sop.user.idcandidato +
+            "/" +
+            this.entidad +
+            "/" +
+            this.municipio +
+            "/" +
+            this.seccion +
+            "/poblacion?page=" +
+            page+"&busqueda="+this.query,
+
+          {
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token
+            }
+          }
+        )
+        .then(response => {
+          cObject.tableData = response.data.data.data;
+          cObject.todos = response.data.data.data;
+          cObject.pagination.total = response.data.data.total;
+          cObject.loader = false;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    },
+    
+   
   },
   created() {
     this.getEntidades();

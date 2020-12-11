@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\PadronElectoral;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
@@ -33,40 +34,69 @@ class Controller extends BaseController
             ->count();
         return $candidato;
     }
-    public function getMunicipios($idEntidad){
+
+    //obtienes lista de municipios
+    public function getMunicipios($idEntidad,$idCandidato){
+        $candidato = DB::table("candidato")->find($idCandidato);
+        $muns = json_decode($candidato->configuacion, true)['registros'];
+        $data = DB::table('municipios')
+            ->whereIn('clave_municipio', $muns)
+            ->get(['id', 'clave_municipio', 'nombre'])
+            ->toArray();
         $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
-        return $municipios;
+        return ["municipios"=>$municipios,"municipio"=>$data];
     }
     //obtienes lista de secciones por municipio
     public function getSecciones($entidad,$claveMunicipio,$candidato){
-        $sec = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->paginate(10);
-        $seccions = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->count();
-        $pages = round($seccions/10);
-        $secciones = [];
-        $nd = [];
-        $nnc = [];
-        $ns = [];
-        $s = [];
-        foreach ($sec as $seccion){
-            array_push($secciones,"Seccion $seccion->seccion");
-            array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO DECIDE"));
-            array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO LO CONOZCO"));
-            array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO"));
-            array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "SI"));
+        $coordinador = true;
+        if($coordinador){
+            $sec = 435;
+            $secciones = [];
+            $nd = [];
+            $nnc = [];
+            $ns = [];
+            $s = [];
+            array_push($secciones,"Seccion $sec");
+            array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
+            array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
+            array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
+            array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
+            return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>true];
+        }else{
+            $sec = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->paginate(10);
+            $seccions = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->count();
+            $pages = round($seccions/10);
+            $secciones = [];
+            $nd = [];
+            $nnc = [];
+            $ns = [];
+            $s = [];
+            foreach ($sec as $seccion){
+                array_push($secciones,"Seccion $seccion->seccion");
+                array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO DECIDE"));
+                array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO LO CONOZCO"));
+                array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO"));
+                array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "SI"));
+            }
+            return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>$pages,"coordinador"=>false];
+
         }
-        return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>$pages];
     }
 
     public function consultaSimpatizantes($entidad, $clave_municipio,$seccion, $user, $simpatiza)
     {
+
+
         $count = PadronElectoral::join("simpatizantes_candidatos as sc", function ($join) use ($user) {
             $join->on("sc.padronelectoral_id", "padronelectoral.id")
                 ->where("sc.candidato_id", $user);
         })
             ->where("entidad", $entidad)
             ->where("municipio", $clave_municipio)
+            ->where("seccion", $seccion)
             ->where("sc.simpatiza", $simpatiza)
             ->count();
         return $count;
     }
+
 }

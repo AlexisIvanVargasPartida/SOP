@@ -94,7 +94,7 @@ class Graficas extends Controller
         return response()->json(["data" => $data], 200);
     }
 
-    public function consultaSimpatizantes($entidad, $clave_municipio, $user, $simpatiza)
+    public function consultaSimpatizantes($entidad, $clave_municipio,$seccion, $user, $simpatiza)
     {
         $count = PadronElectoral::join("simpatizantes_candidatos as sc", function ($join) use ($user) {
             $join->on("sc.padronelectoral_id", "padronelectoral.id")
@@ -102,6 +102,7 @@ class Graficas extends Controller
         })
             ->where("entidad", $entidad)
             ->where("municipio", $clave_municipio)
+            ->where("seccion", $seccion)
             ->where("sc.simpatiza", $simpatiza)
             ->count();
         return $count;

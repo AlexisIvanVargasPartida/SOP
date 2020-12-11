@@ -22,8 +22,8 @@ Route::post('/registro', 'Registro@registro');
 Route::get('/registro/entidades', 'Registro@entidadesMunicipios');
 Route::get('/get/poblacion/{idCandidato}', 'Controller@getPoblacion');
 Route::get('/get/simpatizantes/{idCandidato}', 'Controller@getSimpatizantes');
+Route::get('/get/municipios/{idEntidad}/{idCandidato}', 'Controller@getMunicipios');
 Route::get('/get/secciones/{entidad}/{claveMunicipio}/{candidato}', 'Controller@getSecciones');
-Route::get('/get/municipios/{idEntidad}', 'Controller@getMunicipios');
 Route::post('/login', 'Users\UsersController@login');
 
 Route::group(['middleware' => ['auth:api']], function () {

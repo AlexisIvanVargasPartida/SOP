@@ -11,7 +11,7 @@ module.exports = {
     }
   },
   productionSourceMap: false,
-  publicPath: "/",
+  publicPath: process.env.NODE_ENV === "production" ? "/" : "/",
   pages: {
     index: {
       entry: './src/main.js',
