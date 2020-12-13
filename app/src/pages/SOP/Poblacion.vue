@@ -544,7 +544,7 @@ export default {
     filter(page = 1) {
       let cObject = this;
       this.loader = true;
-      if (this.seccion == null) return;
+      //if (this.seccion == null) return;
       axios
         .get(
           APIURL +

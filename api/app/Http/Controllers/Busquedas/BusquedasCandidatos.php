@@ -86,6 +86,7 @@ class BusquedasCandidatos extends Controller
 
     public function candidatoSecciones(Request $request, $id, $entidad, $municipio_id)
     {
+        //TODO:Coordinador en select, de sección población
         $coordinador = true;
         if($coordinador){
             $seccion = 435;
@@ -139,6 +140,8 @@ class BusquedasCandidatos extends Controller
 
     public function candidatoPoblacion(Request $request, $id, $entidad, $municipio_id, $seccion_id)
     {
+        //TODO: coordinador busqueda en tabla poblacion
+        $coordinador = true;
         if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
@@ -155,18 +158,27 @@ class BusquedasCandidatos extends Controller
         if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
         $userString = $request->user()->candidato_id;
-        $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
+        if($coordinador) {
+            $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
                 $join->on("sc.padronelectoral_id", "padronelectoral.id")
                     ->where("sc.candidato_id", $userString);
             })
-            ->where("entidad", $entidad)
-            ->where("municipio", $municipio->clave_municipio)
-            ->where("seccion", $seccion->seccion);
-            if($request->busqueda!="null"){
-                $data->where("cve_elector","LIKE","%$request->busqueda%");
-            }
-            $data=$data->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.simpatiza","cve_elector")->paginate(15);
+                ->where("entidad", $entidad)
+                ->where("municipio", $municipio->clave_municipio)
+                ->where("seccion", $seccion->seccion);
+        }else{
+            $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
+                $join->on("sc.padronelectoral_id", "padronelectoral.id")
+                    ->where("sc.candidato_id", $userString);
+            })
+                ->where("entidad", $entidad)
+                ->where("municipio", $municipio->clave_municipio);
+        }
+           if($request->busqueda != "null"){
+                $data->where('cve_elector','LIKE', "%$request->busqueda%");
+           }
 
+        $data = $data->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.simpatiza","cve_elector")->paginate(15);
         return response()->json(["data" => $data], 200);
     }
 
