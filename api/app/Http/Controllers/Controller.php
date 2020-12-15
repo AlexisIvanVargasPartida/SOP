@@ -49,7 +49,7 @@ class Controller extends BaseController
     //obtienes lista de secciones por municipio
     public function getSecciones($entidad,$claveMunicipio,$candidato){
     //TODO: Coordinador gráfica de simpatizantes
-        $coordinador = true;
+        $coordinador = false;
         if($coordinador){
             $sec = 435;
             $secciones = [];

@@ -96,11 +96,11 @@ class BusquedasCandidatos extends Controller
 
     public function candidatoSecciones(Request $request, $id, $entidad, $municipio_id)
     {
-        //TODO:Coordinador en select, de sección población
-        $coordinador = true;
+        //TODO: coordinador en select de seccion poblacion
+        $coordinador = false;
         if($coordinador){
             $seccion = 435;
-            if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+            //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
             Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
                 'id' => 'required|integer|exists:candidato,id',
@@ -124,7 +124,7 @@ class BusquedasCandidatos extends Controller
                 ->where('clave_municipio', $municipio_id)->where("seccion",$seccion)->first();
             return response()->json(["data" => $data,"seccion"=>$seccionid->id, "coordinador"=>true], 200);
         }else{
-            if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+            //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
             Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
                 'id' => 'required|integer|exists:candidato,id',
@@ -151,21 +151,23 @@ class BusquedasCandidatos extends Controller
     public function candidatoPoblacion(Request $request, $id, $entidad, $municipio_id, $seccion_id)
     {
         //TODO: coordinador busqueda en tabla poblacion
-        $coordinador = true;
+        $coordinador = false;
         if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
             'id' => 'required|integer|exists:candidato,id',
             'entidad' => 'required|integer',
-            'municipio_id' => 'required|integer'
         ])->validate();
 
         $candidato =  DB::table('candidato')->find($id);
         $seccion =  DB::table('secciones')->find($seccion_id);
-        $municipio =  DB::table('municipios')->find($municipio_id);
+        $municipio = null;
+        if($municipio_id != "null"){
+            $municipio =  DB::table('municipios')->find($municipio_id);
+        }
         $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
 
-        if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
+        //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
         $userString = $request->user()->candidato_id;
         if($coordinador) {
@@ -181,9 +183,17 @@ class BusquedasCandidatos extends Controller
                 $join->on("sc.padronelectoral_id", "padronelectoral.id")
                     ->where("sc.candidato_id", $userString);
             })
-                ->where("entidad", $entidad)
-                ->where("municipio", $municipio->clave_municipio);
+                ->where("entidad", $entidad);
+                //->where("municipio", $municipio->clave_municipio);
         }
+            if($municipio_id != "null"){
+                $data->where("municipio", $municipio_id);
+            }
+            //dd($seccion_id);
+            if($seccion_id != "null"){
+                $seccion  = DB::table("secciones")->find($seccion_id);
+                $data->where("seccion","LIKE", $seccion->seccion);
+            }
            if($request->busqueda != "null"){
                 $data->where('cve_elector','LIKE', "%$request->busqueda%");
            }
@@ -191,6 +201,5 @@ class BusquedasCandidatos extends Controller
         $data = $data->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.simpatiza","cve_elector")->paginate(15);
         return response()->json(["data" => $data], 200);
     }
-
-
+    
 }
