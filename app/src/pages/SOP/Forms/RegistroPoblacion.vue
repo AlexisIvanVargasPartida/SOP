@@ -265,30 +265,69 @@
                   </md-field>
                 </ValidationProvider>
               </div>
-              <div
-                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+               <div
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
-                  name="cp"
+                  name="residencia"
                   rules="required|numeric"
                   v-slot="{ passed, failed }"
                 >
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Código Postal</label>
-                    <md-input
-                      v-model="cp"
-                      type="text"
-                      @change="
-                        sendData('cp', cp);
-                        getColonias();
+                    <label>Lugar de Residencia</label>
+                    <md-select
+                      v-model="residencia"
+                      name="residencia"
+                      id="residencia"
+                      @input="
+                       
+                        getMunicipios();
                       "
                     >
-                    </md-input>
+                      <md-option
+                        v-for="ef in entidadeFederativas"
+                        :key="ef.id"
+                        :value="ef.id"
+                        >{{ ef.nombre }}</md-option
+                      >
+                    </md-select>
                   </md-field>
                 </ValidationProvider>
               </div>
+              <div
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
+              >
+                <ValidationProvider
+                  name="Municipio"
+                  rules="required"
+                  v-slot="{ passed, failed }"
+                >
+                  <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Municipio</label>
+                    <md-select
+                      v-model="municipio"
+                      name="municipio"
+                      id="municipio"
+                      @input="
+                       
+                        getColonias();
+                      "
+                    >
+                       <md-option
+                        v-for="mu in municipios"
+                        :key="mu.id"
+                        :value="mu.id"
+                        >{{ mu.nombre }}</md-option
+                      >
+                    </md-select>
+                  </md-field>
+                </ValidationProvider>
+              </div>
+             
               <div
                 class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100"
               >
@@ -317,6 +356,29 @@
                         >{{ col.nombre }}</md-option
                       >
                     </md-select>
+                  </md-field>
+                </ValidationProvider>
+              </div>
+               <div
+                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+              >
+                <ValidationProvider
+                  name="cp"
+                  rules="numeric"
+                  v-slot="{ passed, failed }"
+                >
+                  <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Código Postal</label>
+                    <md-input
+                      v-model="cp"
+                      type="text"
+                      @change="
+                        sendData('cp', cp);
+                      "
+                    >
+                    </md-input>
                   </md-field>
                 </ValidationProvider>
               </div>
@@ -499,6 +561,8 @@ extend("numeric", numeric);
 export default {
   data() {
     return {
+      municipio:"",
+      residencia:"",
       nombre: "",
       apellidop: "",
       apellidom: "",
@@ -518,6 +582,7 @@ export default {
       adicional_tel: "",
       redsocial: "",
       entidadeFederativas: [],
+      municipios:[],
       colonias: [],
       secciones: []
     };
@@ -547,14 +612,29 @@ export default {
           cObject.$helpers.catchError(error);
         });
     },
+      getMunicipios() {
+      let cObject = this;
+      axios
+        .get(APIURL + "municipios/"+this.residencia, {
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          cObject.municipios = response.data.data;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    },
     getColonias() {
       let cObject = this;
-      if (this.cp.length < 4) return;
+      //if (this.cp.length < 4) return;
       this.colonia = "";
       this.seccion = "";
       this.secciones = [];
       axios
-        .get(APIURL + "colonias/" + this.cp, {
+        .get(APIURL + "colonias/" + this.municipio, {
           headers: {
             Authorization: "Bearer " + this.$store.state.sop.authorization.token
           }
@@ -571,7 +651,7 @@ export default {
       this.seccion = "";
       this.secciones = [];
       axios
-        .get(APIURL + "secciones/" + this.cp + "/" + this.colonia, {
+        .get(APIURL + "secciones/" + this.municipio + "/" + this.colonia, {
           headers: {
             Authorization: "Bearer " + this.$store.state.sop.authorization.token
           }

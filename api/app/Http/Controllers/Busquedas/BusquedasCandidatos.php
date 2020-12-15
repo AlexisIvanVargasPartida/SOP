@@ -19,10 +19,10 @@ class BusquedasCandidatos extends Controller
         return response()->json(["data" => $data], 200);
     }
 
-    public function getColonias($cp)
+    public function getColonias($cve_municipio)
     {
         $data = DB::table('secciones_colonias')
-            ->where('cp', $cp)
+            ->where('clave_municipio', $cve_municipio)
             ->groupBy('nombre')
             ->get(['nombre'])
             ->toArray();
@@ -30,10 +30,20 @@ class BusquedasCandidatos extends Controller
         return response()->json(["data" => $data], 200);
     }
 
-    public function getColoniasSecciones($cp, $colonia)
+    public function getMunicip($entidad)
+    {
+        $data = DB::table('municipios')
+            ->where('clave_entidad_federal', $entidad)
+            ->get(["id",'nombre'])
+            ->toArray();
+
+        return response()->json(["data" => $data], 200);
+    }
+
+    public function getColoniasSecciones($cve_municipio, $colonia)
     {
         $data = DB::table('secciones_colonias')
-            ->where('cp', $cp)
+            ->where('clave_municipio', $cve_municipio)
             ->where('nombre', $colonia)
             ->get(['id', 'seccion'])
             ->toArray();

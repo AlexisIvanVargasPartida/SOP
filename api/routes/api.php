@@ -29,8 +29,9 @@ Route::post('/login', 'Users\UsersController@login');
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/logout', 'Users\UsersController@logout');
     Route::get('/entidades', 'Busquedas\BusquedasCandidatos@entidadesFederativas');
-    Route::get('/colonias/{cp}', 'Busquedas\BusquedasCandidatos@getColonias');
-    Route::get('/secciones/{cp}/{colonia}', 'Busquedas\BusquedasCandidatos@getColoniasSecciones');
+    Route::get('/colonias/{cve_municipio}', 'Busquedas\BusquedasCandidatos@getColonias');
+    Route::get('/municipios/{entidad}', 'Busquedas\BusquedasCandidatos@getMunicip');
+    Route::get('/secciones/{cve_municipio}/{colonia}', 'Busquedas\BusquedasCandidatos@getColoniasSecciones');
     Route::post('/registro/poblacion', 'Simpatizantes@registroPoblacion');
     Route::post('/registro/simpatizante', 'Simpatizantes@registroSimpatizante');
 
