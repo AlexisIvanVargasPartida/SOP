@@ -152,7 +152,7 @@ class BusquedasCandidatos extends Controller
     {
         //TODO: coordinador busqueda en tabla poblacion
         $coordinador = false;
-        if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+        //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
             'id' => 'required|integer|exists:candidato,id',
@@ -169,7 +169,7 @@ class BusquedasCandidatos extends Controller
 
         //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
-        $userString = $request->user()->candidato_id;
+        $userString = $candidato->id;
         if($coordinador) {
             $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
                 $join->on("sc.padronelectoral_id", "padronelectoral.id")
@@ -195,10 +195,16 @@ class BusquedasCandidatos extends Controller
                 $data->where("seccion","LIKE", $seccion->seccion);
             }
            if($request->busqueda != "null"){
-                $data->where('cve_elector','LIKE', "%$request->busqueda%");
+                //$data->where('cve_elector','LIKE', "%$request->busqueda%");
+                $data->where(function ($query) use ($request){
+                    $query->where('cve_elector','LIKE', "%$request->busqueda%")
+                        ->orWhere(DB::raw('CONCAT_WS(" ", nombre, paterno, materno)'),'LIKE', "%$request->busqueda%")
+                        ->orWhere("sc.data",'LIKE', "%$request->busqueda%")
+                    ;
+                });
            }
 
-        $data = $data->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.simpatiza","cve_elector")->paginate(15);
+        $data = $data->select("padronelectoral.id", "nombre", "paterno", "materno", "calle", "num_ext", "colonia", "cp", "seccion", "sc.simpatiza","cve_elector","sc.data")->paginate(15);
         return response()->json(["data" => $data], 200);
     }
     
