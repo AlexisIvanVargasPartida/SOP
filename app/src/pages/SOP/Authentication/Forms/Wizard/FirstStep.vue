@@ -35,6 +35,7 @@
               </md-field>
             </ValidationProvider>
           </div>
+         
           <div class="md-layout-item md-size-60 md-small-size-100 mx-auto">
             <ValidationProvider
               name="clave"
@@ -62,6 +63,28 @@
                 </slide-y-down-transition>
               </md-field>
             </ValidationProvider>
+          </div>
+          <br>
+           <div class="md-layout-item md-size-60 md-small-size-100 mx-auto">
+               <md-switch v-model="coordinador" 
+                @change="sendData('coordinador', coordinador+'')">¿Es Coordinador? {{(coordinador) ? "Si":"No"}}</md-switch>
+          </div>
+          <div class="md-layout-item md-size-60 md-small-size-100 mx-auto" v-if="coordinador">
+               <md-field>
+            <label for="candidatos">Candidatos</label>
+            <md-select
+              v-model="candidato"
+              name="candidato"
+              id="candidato"
+              @input="sendData('candidato', candidato)"
+              ><md-option
+                v-for="(can, id) in candidatos"
+                :key="id"
+                :value="can.id"
+                >{{ can.nombre }}</md-option
+              >
+            </md-select>
+          </md-field>
           </div>
           <div
             class="md-layout-item md-size-60 md-small-size-100 mx-auto"
@@ -101,6 +124,8 @@
   </ValidationObserver>
 </template>
 <script>
+import { APIURL } from "@/api.js";
+import axios from "axios";
 import { SlideYDownTransition } from "vue2-transitions";
 import { extend } from "vee-validate";
 import { required, email, min, max } from "vee-validate/dist/rules";
@@ -116,6 +141,9 @@ export default {
   },
   data() {
     return {
+      candidatos:[],
+      candidato:"",
+      coordinador:false,
       nombre: "",
       clave: "",
       partido: ""
@@ -130,9 +158,35 @@ export default {
         this.$emit("on-validated", res);
         return res;
       });
-    }
+    },
+    getCandidatos() {
+      let cObject = this;
+      axios
+        .get(
+          APIURL +
+            "get/candidatos/all" ,
+          {
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token
+            }
+          }
+        )
+        .then(response => {
+          let data=response.data;
+         
+            cObject.candidatos=data.candidatos;
+
+
+          
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    },
   },
   created() {
+    this.getCandidatos();
     extend("clve", {
       validate: value =>
         new Promise(resolve => {
@@ -147,4 +201,6 @@ export default {
   }
 };
 </script>
-<style></style>
+<style>
+</style>
+

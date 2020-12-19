@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Candidato;
+use App\Coordinador;
 use App\Http\Resources\EntidadesFederales;
 use App\Http\Resources\EntidadesMunicipales;
 use App\Models\User;
@@ -22,24 +23,29 @@ class Registro extends Controller
     }
 
     public function registro(Request $request)
-    {   
+    {
         Validator::make($request->all(), [
             'email'         => 'string|email',
             'nombre'      => 'required|string',
             'partido'      => 'required|string',
             'ce'      => 'string',
-            'password'      => 'required|string'
+            'password'      => 'required|string',
+            "coordinador"=>"string",
+            "candidato"=>"int"
         ])->validate();
-
         $jsonData = [
             "partido" => $request->partido,
             "ce" => $request->ce,
             "registros" => $this->generaArrayRegistros($request->values)
         ];
 
-        $candidato = Candidato::create(['nombre' => $request->nombre, 'configuacion' => json_encode($jsonData)]);
-        User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1]);
-
+        if($request->coordinador == "true"){
+            $candidato = Coordinador::create(['nombre' => $request->nombre, 'configuracion' => json_encode($jsonData),"candidato_id"=>$request->candidato]);
+            User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"S"]);
+        }else{
+            $candidato = Candidato::create(['nombre' => $request->nombre, 'configuacion' => json_encode($jsonData)]);
+            User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"N"]);
+        }
         return response()->json("Ok", 200);
     }
 

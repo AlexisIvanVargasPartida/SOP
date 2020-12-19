@@ -18,9 +18,13 @@ class User extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->name,
+            "coordinador" => $this->coordinador,
             'rol' => DB::table('roles')->where('id', $this->role_id)->first()->nombre,
-            'idcandidato' => $this->candidato_id,
-            'candidato' => DB::table('candidato')->where('id', $this->candidato_id)->first()->nombre,
+            'idcandidato' => ($this->coordinador == "S") ?  DB::table('coordinador')->where('id', $this->candidato_id)->first()->candidato_id
+                : $this->candidato_id,
+            'candidato' => ($this->coordinador == "S") ?
+                DB::table('coordinador')->where('id', $this->candidato_id)->first()->nombre :
+                DB::table('candidato')->where('id', $this->candidato_id)->first()->nombre,
         ];
     }
 }

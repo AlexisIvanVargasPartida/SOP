@@ -35,6 +35,11 @@ class Controller extends BaseController
         return $candidato;
     }
 
+    public function getCandidatos(){
+        $candidatos =  DB::table('candidato')->get();
+        return  ["candidatos"=>$candidatos];
+    }
+
     //obtienes lista de municipios
     public function getMunicipios($idEntidad,$idCandidato){
         $candidato = DB::table("candidato")->find($idCandidato);
@@ -48,7 +53,7 @@ class Controller extends BaseController
     }
     //obtienes lista de secciones por municipio
     public function getSecciones($entidad,$claveMunicipio,$candidato){
-    //TODO: Coordinador gráfica de simpatizantes
+        //TODO: coordinador grafica de simpatizantes
         $coordinador = false;
         if($coordinador){
             $sec = 435;
