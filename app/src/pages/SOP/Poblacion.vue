@@ -482,6 +482,9 @@ export default {
             this.municipio +
             "/secciones",
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
@@ -525,6 +528,9 @@ export default {
             "/poblacion?page=" +
             page+"&busqueda=null",
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
@@ -560,6 +566,9 @@ export default {
             page+"&busqueda="+this.query,
 
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token

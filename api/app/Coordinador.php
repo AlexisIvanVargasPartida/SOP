@@ -9,6 +9,6 @@ class Coordinador extends Model
     protected $table = 'coordinador';
 
     protected $fillable = [
-        'nombre', 'configuacion',"candidato_id"
+        'nombre', 'configuracion',"candidato_id"
     ];
 }

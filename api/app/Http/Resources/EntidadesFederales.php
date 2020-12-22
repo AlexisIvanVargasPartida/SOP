@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Candidato;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\EntidadesMunicipales;
@@ -14,7 +15,20 @@ class EntidadesFederales extends JsonResource
      * @return array
      */
     public function toArray($request)
-    {   $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label','id as idmun']);
+    {
+        if($request->coordinador == "true"){
+            $candidato = Candidato::find($request->id);
+            $registro = json_decode($candidato->configuacion, true)['registros'];
+            $entidades = current($registro);
+            if(count($entidades) > 1){
+                $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
+            }else{
+                $entidad = current($entidades);
+                $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->where("id",$entidad)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
+            }
+        }else{
+            $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
+        }
         return [
             'id' => $this->id,
             'label' => $this->nombre,

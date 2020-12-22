@@ -38,6 +38,7 @@ const sleep = d => new Promise(r => setTimeout(r, d));
 let called = false;
 import { APIURL } from "@/api.js";
 import axios from "axios";
+import EventBus from "./bus";
 
 export default {
   components: {
@@ -47,6 +48,8 @@ export default {
     return {
       values: null,
       options: null,
+      id:null,
+      coordinador:null,
     };
   },
   methods: {
@@ -71,10 +74,26 @@ export default {
       }
     },
     getCategories() {
+      let obj = this;
+      EventBus.$on("coordinador",function(item){
+        if(item == "false"){
+          obj.coordinador=false;
+          obj.reloadOptions();
+        }
+     });
+     EventBus.$on("candidato",function(item){
+       obj.coordinador=true;
+       obj.id=item;
+       obj.reloadOptions();
+     });
       return new Promise((resolve, reject) => {
        
         axios
-          .get(APIURL + "registro/entidades", {}) 
+          .get(APIURL + "registro/entidades", {
+            params:{
+              coordinador:obj.coordinador, 
+              id:obj.id
+            }}) 
           .then(response => {
             resolve(response);
           })
@@ -83,7 +102,12 @@ export default {
           });
       });
     },
-
+ getData(data) {
+      this.data[data.field] = data.value;
+    },
+    beforeChange(){
+      alert("algo");
+    },
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
     },

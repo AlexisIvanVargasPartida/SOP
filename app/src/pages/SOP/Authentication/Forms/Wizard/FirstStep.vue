@@ -129,6 +129,7 @@ import axios from "axios";
 import { SlideYDownTransition } from "vue2-transitions";
 import { extend } from "vee-validate";
 import { required, email, min, max } from "vee-validate/dist/rules";
+import EventBus from "./bus";
 
 extend("required", required);
 extend("email", email);
@@ -152,6 +153,7 @@ export default {
   methods: {
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
+      EventBus.$emit(field, val);
     },
     validate() {
       return this.$refs.form.validate().then(res => {

@@ -50,7 +50,7 @@ export default {
                         data.authorization.permissions = response.data.permissions;
                         let dataUser = {
                             coordinador: response.data.user.coordinador,
-                            idcoordinador: response.data.user.id,
+                            idusr: response.data.user.id,
                             name: response.data.user.nombre,
                             rol: response.data.user.rol,
                             idcandidato: response.data.user.idcandidato,

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Coordinador;
 use App\Models\PadronElectoral;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -52,11 +55,20 @@ class Controller extends BaseController
         return ["municipios"=>$municipios,"municipio"=>$data];
     }
     //obtienes lista de secciones por municipio
-    public function getSecciones($entidad,$claveMunicipio,$candidato){
+    public function getSecciones($entidad,$claveMunicipio,$candidato,Request $request){
         //TODO: coordinador grafica de simpatizantes
-        $coordinador = false;
+        $user = User::find($request->id);
+        if($user->coordinador == "S"){
+            $c = Coordinador::find($user->candidato_id);
+            $coordinador = true;
+        }else {
+            $c = null;
+            $coordinador = false;
+        }
         if($coordinador){
-            $sec = 435;
+            $sec = json_decode($c->configuracion, true)['registros'];
+            $arr = explode("-",$sec[0]);
+            $sec = $arr[2];
             $secciones = [];
             $nd = [];
             $nnc = [];

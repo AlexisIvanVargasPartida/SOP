@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Candidato;
+use App\Models\Candidato;
 use App\Coordinador;
 use App\Http\Resources\EntidadesFederales;
 use App\Http\Resources\EntidadesMunicipales;
@@ -24,34 +24,48 @@ class Registro extends Controller
 
     public function registro(Request $request)
     {
+
         Validator::make($request->all(), [
-            'email'         => 'string|email',
-            'nombre'      => 'required|string',
-            'partido'      => 'required|string',
-            'ce'      => 'string',
-            'password'      => 'required|string',
-            "coordinador"=>"string",
-            "candidato"=>"int"
+            'email' => 'string|email',
+            'nombre' => 'required|string',
+            'partido' => 'required|string',
+            'ce' => 'string',
+            'password' => 'required|string',
+            "coordinador" => "string",
+            "candidato" => "int"
         ])->validate();
-        $jsonData = [
-            "partido" => $request->partido,
-            "ce" => $request->ce,
-            "registros" => $this->generaArrayRegistros($request->values)
-        ];
 
         if($request->coordinador == "true"){
+            $jsonData = [
+                "partido" => $request->partido,
+                "ce" => $request->ce,
+                "registros" => $request->values
+            ];
             $candidato = Coordinador::create(['nombre' => $request->nombre, 'configuracion' => json_encode($jsonData),"candidato_id"=>$request->candidato]);
             User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"S"]);
         }else{
+            $jsonData = [
+                "partido" => $request->partido,
+                "ce" => $request->ce,
+                "registros" => $this->generaArrayRegistros($request->values)
+            ];
             $candidato = Candidato::create(['nombre' => $request->nombre, 'configuacion' => json_encode($jsonData)]);
             User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"N"]);
         }
         return response()->json("Ok", 200);
     }
 
-    public function entidadesMunicipios()
+    public function entidadesMunicipios(Request $request)
     {
-        $entidades = DB::table('entidades_federales')->get();
+        if($request->coordinador == "true"){
+            $candidato = Candidato::find($request->id);
+            $registro = json_decode($candidato->configuacion, true)['registros'];
+            $entidad = key($registro);
+            $entidades = DB::table('entidades_federales')->where("id",$entidad)->get();
+        }else{
+            $entidades = DB::table('entidades_federales')->get();
+        }
+
         return EntidadesFederales::collection($entidades);
     }
 

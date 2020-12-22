@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Coordinador;
 use App\Models\PadronElectoral;
 use App\Models\SimpatizantesCandidato;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +15,6 @@ class Simpatizantes extends Controller
 
     public function registroPoblacion(Request $request)
     {
-
         try {
             $getDatos = DB::table('secciones_colonias')->where("id", $request->seccion)->first();
             $localidad = DB::table('localidades_secciones')
@@ -37,10 +38,16 @@ class Simpatizantes extends Controller
             $exist = PadronElectoral::where("cve_elector", "like", $claveElector . "%")->get();
             $claveElector = $claveElector . "000";
             if (count($exist)>0) $claveElector = $exist[0]["cve_elector"];
+            if($request->user()->coordinador == "S"){
+                $coordinador = Coordinador::find($request->user()->candidato_id);
+                $idcandidato = $coordinador->candidato_id;
+            }else{
+                $idcandidato = $request->user()->candidato_id;
+            }
             $row = PadronElectoral::updateOrCreate(['cve_elector' => $claveElector], $data);
             SimpatizantesCandidato::updateOrCreate(
                 [
-                    'candidato_id' => $request->user()->candidato_id,
+                    'candidato_id' => $idcandidato,
                     'padronelectoral_id' => $row->id,
                 ],
                 $dataCandidato

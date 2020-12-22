@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Busquedas;
 
+use App\Coordinador;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\PadronElectoral;
@@ -53,7 +55,7 @@ class BusquedasCandidatos extends Controller
 
     public function candidatoEntidades(Request $request, $id)
     {
-        if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+        //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id]), [
             'id' => 'required|integer|exists:candidato,id'
@@ -75,7 +77,7 @@ class BusquedasCandidatos extends Controller
 
     public function candidatoMunicipios(Request $request, $id, $entidad)
     {
-        if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+        //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad]), [
             'id' => 'required|integer|exists:candidato,id',
@@ -97,9 +99,18 @@ class BusquedasCandidatos extends Controller
     public function candidatoSecciones(Request $request, $id, $entidad, $municipio_id)
     {
         //TODO: coordinador en select de seccion poblacion
-        $coordinador = false;
+        $user = User::find($request->id);
+        if($user->coordinador == "S"){
+            $c = Coordinador::find($user->candidato_id);
+            $coordinador = true;
+        }else {
+            $c = null;
+            $coordinador = false;
+        }
         if($coordinador){
-            $seccion = 435;
+            $sec = json_decode($c->configuracion, true)['registros'];
+            $arr = explode("-",$sec[0]);
+            $sec = $arr[2];
             //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
             Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
@@ -110,18 +121,18 @@ class BusquedasCandidatos extends Controller
 
             $candidato =  DB::table('candidato')->find($id);
             $municipio =  DB::table('municipios')->find($municipio_id);
-            $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
+            //$municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
 
-            if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
+            //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
             $data = DB::table('secciones')
                 ->where('clave_entidad_federal', $entidad)
                 ->where('clave_municipio', $municipio_id)
-                ->where('seccion', $seccion)
+                ->where('seccion', $sec)
                 ->get(['id', 'seccion', 'tipo'])
                 ->toArray();
             $seccionid = DB::table("secciones")->where('clave_entidad_federal', $entidad)
-                ->where('clave_municipio', $municipio_id)->where("seccion",$seccion)->first();
+                ->where('clave_municipio', $municipio_id)->where("seccion",$sec)->first();
             return response()->json(["data" => $data,"seccion"=>$seccionid->id, "coordinador"=>true], 200);
         }else{
             //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
@@ -151,7 +162,15 @@ class BusquedasCandidatos extends Controller
     public function candidatoPoblacion(Request $request, $id, $entidad, $municipio_id, $seccion_id)
     {
         //TODO: coordinador busqueda en tabla poblacion
-        $coordinador = false;
+
+        $user = User::find($request->id);
+        if($user->coordinador == "S"){
+            $c = Coordinador::find($user->candidato_id);
+            $coordinador = true;
+        }else {
+            $c = null;
+            $coordinador = false;
+        }
         //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
@@ -167,17 +186,21 @@ class BusquedasCandidatos extends Controller
         }
         $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
 
+
         //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
         $userString = $candidato->id;
         if($coordinador) {
+            $sec = json_decode($c->configuracion, true)['registros'];
+            $arr = explode("-",$sec[0]);
+            $sec = $arr[2];
             $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
                 $join->on("sc.padronelectoral_id", "padronelectoral.id")
                     ->where("sc.candidato_id", $userString);
             })
                 ->where("entidad", $entidad)
                 ->where("municipio", $municipio->clave_municipio)
-                ->where("seccion", $seccion->seccion);
+                ->where("seccion", $sec);
         }else{
             $data = PadronElectoral::leftjoin("simpatizantes_candidatos as sc", function ($join) use ($userString) {
                 $join->on("sc.padronelectoral_id", "padronelectoral.id")
