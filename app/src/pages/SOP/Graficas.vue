@@ -269,7 +269,7 @@ export default {
     cObject.amount=(cObject.pageactual)*(100/cObject.pages);
 
     if(cObject.pageactual<=cObject.pages){
-      location.replace("/graficas?page="+cObject.pageactual+"&municipio="+cObject.selmunicipio)
+      location.replace("/graficas?page="+cObject.pageactual+"&municipio="+cObject.selmunicipio+"&id="+this.$store.state.sop.user.idusr)
     }else{
       cObject.pageactual=cObject.pages;
     }
@@ -278,7 +278,7 @@ export default {
     cObject.pageactual=cObject.pageactual-1;
     cObject.amount=(cObject.pageactual)*(100/cObject.pages);
     if(cObject.pageactual>=1){
-      location.replace("/graficas?page="+cObject.pageactual+"&municipio="+cObject.selmunicipio)
+      location.replace("/graficas?page="+cObject.pageactual+"&municipio="+cObject.selmunicipio+"&id="+this.$store.state.sop.user.idusr)
     }else{
       cObject.pageactual=1;
     }
@@ -469,8 +469,11 @@ export default {
         .get(
           APIURL +
             "get/secciones/" + this.entidad+"/"+
-             municipio+"/"+ this.$store.state.sop.user.idcandidato+"?page="+page,
+             municipio+"/"+ this.$store.state.sop.user.idcandidato,
           {
+            params:{
+            id:this.$store.state.sop.user.idusr,page:page
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
