@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Candidato;
 use App\Coordinador;
 use App\Http\Resources\EntidadesFederales;
 use App\Http\Resources\EntidadesMunicipales;
+use App\Models\Candidato;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +24,6 @@ class Registro extends Controller
 
     public function registro(Request $request)
     {
-
         Validator::make($request->all(), [
             'email' => 'string|email',
             'nombre' => 'required|string',
@@ -32,17 +31,26 @@ class Registro extends Controller
             'ce' => 'string',
             'password' => 'required|string',
             "coordinador" => "string",
-            "candidato" => "int"
+            "candidato" => "int",
+            #"co_de" => "string",
+            #"demarcacion"=> "int"
         ])->validate();
 
         if($request->coordinador == "true"){
             $jsonData = [
                 "partido" => $request->partido,
                 "ce" => $request->ce,
-                "registros" => $request->values
+                "registros" => ($request->co_de == "true") ? "demarcacion:$request->demarcacion" : $request->values
             ];
             $candidato = Coordinador::create(['nombre' => $request->nombre, 'configuracion' => json_encode($jsonData),"candidato_id"=>$request->candidato]);
-            User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"S"]);
+            if($request->co_de == "true"){
+                User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password),
+                    'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"S", "demarcacion"=> $request->demarcacion, "co_de" => "S"]);
+            }else{
+                User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password),
+                    'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"S", "demarcacion"=> null, "co_de"=> "N"]);
+            }
+
         }else{
             $jsonData = [
                 "partido" => $request->partido,

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Coordinador;
+use App\Demarcaciones;
+use App\Models\Candidato;
 use App\Models\PadronElectoral;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -58,6 +60,13 @@ class Controller extends BaseController
     public function getSecciones($entidad,$claveMunicipio,$candidato,Request $request){
         //TODO: coordinador grafica de simpatizantes
         $user = User::find($request->id);
+        $demarcacion=false;
+        $seccs = [];
+        if($user->co_de == "S"){
+            $demarcaciones = Demarcaciones::find($user->demarcacion);
+            $seccs = explode(",",$demarcaciones->secciones);
+            $demarcacion = true;
+        }
         if($user->coordinador == "S"){
             $c = Coordinador::find($user->candidato_id);
             $coordinador = true;
@@ -66,20 +75,31 @@ class Controller extends BaseController
             $coordinador = false;
         }
         if($coordinador){
-            $sec = json_decode($c->configuracion, true)['registros'];
-            $arr = explode("-",$sec[0]);
-            $sec = $arr[2];
             $secciones = [];
             $nd = [];
             $nnc = [];
             $ns = [];
             $s = [];
-            array_push($secciones,"Seccion $sec");
-            array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
-            array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
-            array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
-            array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
-            return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>true];
+            if($demarcacion){
+                foreach ($seccs as $sec){
+                    array_push($secciones,"Seccion $sec");
+                    array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
+                    array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
+                    array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
+                    array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
+                }
+                return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>false];
+            }else{
+                $sec = json_decode($c->configuracion, true)['registros'];
+                $arr = explode("-",$sec[0]);
+                $sec = $arr[2];
+                array_push($secciones,"Seccion $sec");
+                array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
+                array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
+                array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
+                array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
+                return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>true];
+            }
         }else{
             $sec = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->paginate(10);
             $seccions = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->count();
@@ -117,4 +137,16 @@ class Controller extends BaseController
         return $count;
     }
 
+    public function getMunicipiosCandidato($id){
+        $candidato = DB::table("candidato")->find($id);
+        $registro = json_decode($candidato->configuacion, true)['registros'];
+        $entidad = key($registro);
+        $municipios = DB::table("municipios")->where("clave_entidad_federal",$entidad)->get();
+        return $municipios;
+    }
+
+    public function consultaDemarcacionesCandidato($municipio_id){
+        $demarcaciones = Demarcaciones::where("municipio_id",$municipio_id)->get();
+        return $demarcaciones;
+    }
 }

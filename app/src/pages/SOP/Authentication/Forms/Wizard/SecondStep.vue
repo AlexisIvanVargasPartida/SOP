@@ -1,6 +1,47 @@
 <template>
+          
   <div>
-    <h5 class="info-text">
+    <br>
+     <div class="md-layout-item md-size-50 md-small-size-100 mx-auto" v-if="coordinador">
+               <md-switch v-model="co_de" 
+                @change="sendData('co_de', co_de+'')">¿Es Coordinador de Demarcación? {{(co_de) ? "Si":"No"}}</md-switch>
+          </div>
+          <div class="md-layout-item md-size-50 md-small-size-100 mx-auto" v-if="co_de">
+               <md-field>
+            <label for="municipio">Municipios</label>
+            <md-select
+              v-model="municipio"
+              name="municipio"
+              id="municipio"
+              @input="getDemarcaciones()"
+              ><md-option
+                v-for="(mun, id) in municipios"
+                :key="id"
+                :value="mun.clave_municipio"
+                >{{ mun.nombre }}</md-option
+              >
+              
+            </md-select>
+          </md-field>
+            <md-field>
+            <label for="demarcaciones">Demarcacion</label>
+            <md-select
+              v-model="demarcacion"
+              name="demarcacion"
+              id="demarcacion"
+              @input="sendData('demarcacion', demarcacion)"
+              ><md-option
+                v-for="(dem, id) in demarcaciones"
+                :key="id"
+                :value="dem.id"
+                >demarcacion {{ dem.demarcacion }} secciones {{dem.secciones}}</md-option
+              >
+              
+            </md-select>
+          </md-field>
+          </div>
+    <div v-if="!co_de">
+      <h5 class="info-text">
       Selecciona la Entidad Federativa, Municipios, y Distritos requeridos para
       tu Candidatura
     </h5>
@@ -21,12 +62,13 @@
           :default-expand-level="0"
           :show-count="true"
           :always-open="true"
-          :multiple="true"
+          :multiple="!coordinador"
           :options="options"
           @input="sendData('values', values)"
         >
         </treeselect>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -46,6 +88,11 @@ export default {
   },
   data() {
     return {
+      municipios:[],
+      demarcaciones:[],
+      demarcacion:null,
+      municipio:null,
+      co_de:false,
       values: null,
       options: null,
       id:null,
@@ -85,6 +132,7 @@ export default {
        obj.coordinador=true;
        obj.id=item;
        obj.reloadOptions();
+       obj.getMunicipios(item);
      });
       return new Promise((resolve, reject) => {
        
@@ -102,6 +150,37 @@ export default {
           });
       });
     },
+    getMunicipios(id){
+      let obj=this;
+      axios
+          .get(APIURL + "get/municipio/candidato/"+id, {
+            params:{
+             
+            }}) 
+          .then(response => {
+            this.municipios=response.data;
+          })
+          .catch(error => {
+            reject(error);
+          });
+
+    },
+    getDemarcaciones(){
+      let obj=this;
+      obj.demarcacion=null;
+      axios
+          .get(APIURL + "get/demarcaciones/"+obj.municipio, {
+            params:{
+             
+            }}) 
+          .then(response => {
+            this.demarcaciones=response.data;
+          })
+          .catch(error => {
+            reject(error);
+          });
+
+    },
  getData(data) {
       this.data[data.field] = data.value;
     },
@@ -113,6 +192,9 @@ export default {
     },
     validate() {
       this.$emit("on-validated", true, this.values);
+      if(this.co_de){
+      return Promise.resolve(true);
+      }
       if (this.values == null || this.values.length < 1)
         return Promise.resolve(false);
       return Promise.resolve(true);
