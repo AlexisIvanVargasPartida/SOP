@@ -1,5 +1,11 @@
 <template>
   <div class="md-layout">
+    <md-dialog-alert
+                  :md-active.sync="alerta"
+                  md-title="Alerta"
+                  md-content="La Clave de Elector ya se encuentra registrada"
+                  md-confirm-text="ACEPTAR"
+                  />
     <div
       class="md-layout-item md-size-80 md-xsmall-size-80 mx-auto"
       v-if="!dataSend"
@@ -63,6 +69,7 @@ import { SimpleWizard, WizardTab } from "@/components";
 export default {
   data() {
     return {
+      alerta:false,
       wizardModel: {},
       data: {},
       dataSend: false,
@@ -134,6 +141,10 @@ export default {
           }
         )
         .then(response => {
+          if(response.data==202){
+            cObject.alerta=true;
+            return;
+          }
           cObject.dataSend = true;
         })
         .catch(error => {

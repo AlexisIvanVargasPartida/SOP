@@ -258,11 +258,18 @@
                     <md-input
                       v-model="ce"
                       type="text"
-                      @change="sendData('ce', ce)"
+                      @change="sendClave('ce', ce)"
                      
                     >
                     </md-input>
                   </md-field>
+                  <md-dialog-alert
+                  :md-active.sync="alerta"
+                  md-title="Alerta"
+                  md-content="La Clave de Elector ya se encuentra registrada"
+                  md-confirm-text="ACEPTAR"
+                  />
+                    
                 </ValidationProvider>
               </div>
                <div
@@ -561,6 +568,7 @@ extend("numeric", numeric);
 export default {
   data() {
     return {
+      alerta:false,
       municipio:"",
       residencia:"",
       nombre: "",
@@ -590,6 +598,32 @@ export default {
   methods: {
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
+    },
+    sendClave(field, val) {
+      let cObject=this;
+      cObject.compruebaClave(val);
+      this.$emit("data", { field: field, value: val });
+    },
+    compruebaClave(cve){
+       let cObject=this;
+      axios
+        .get(APIURL + "comprueba/cve/electoral", {
+          params:{
+            cve_elector:cve
+          },
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          if(response.data==202){
+            cObject.alerta=true;
+          }
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+      
     },
     validate() {
       return this.$refs.form.validate().then(res => {
