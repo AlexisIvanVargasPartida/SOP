@@ -23,6 +23,12 @@ class Simpatizantes extends Controller
                 ->where("seccion", $getDatos->seccion)
                 ->first();
 
+            $simpatizante = PadronElectoral::where("cve_elector",'like',"%$request->cve_elector%")->first();
+
+            if($simpatizante != null){
+                return response()->json(202, 200);
+            }
+
             $data = $request->except('seccion', 'cve_elector', 'simpatiza', 'year', 'month', 'day', 'data');
             $dataCandidato = $request->only('simpatiza', 'data');
             $dataCandidato["created_by"] = $request->user()->id;
@@ -57,6 +63,14 @@ class Simpatizantes extends Controller
             return response()->json(["error"=>$th->getMessage()], 404);
         }
     }
+
+    public function compruebaClave(Request $request){
+        $simpatizante = PadronElectoral::where("cve_elector",'like',"$request->cve_elector%")->first();
+        if($simpatizante != null){
+            return response()->json(202, 200);
+        }
+    }
+
     public function registroSimpatizante(Request $request)
     {
         Validator::make($request->all(), [

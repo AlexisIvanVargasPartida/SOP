@@ -28,6 +28,10 @@ Route::get('/get/municipio/candidato/{id}', 'Controller@getMunicipiosCandidato')
 Route::get('/get/demarcaciones/{municipio_id}', 'Controller@consultaDemarcacionesCandidato');
 Route::get('/get/candidatos/all', 'Controller@getCandidatos');
 Route::post('/login', 'Users\UsersController@login');
+Route::get('/comprueba/cve/electoral', 'Simpatizantes@compruebaClave');
+
+Route::post('/solicita/cambio/pass', 'Controller@solicitaCambioPass');
+Route::post('/cambiar/password', 'Controller@cambiarContrasena');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/logout', 'Users\UsersController@logout');

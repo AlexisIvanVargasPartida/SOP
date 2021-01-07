@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Coordinador;
 use App\Demarcaciones;
+use App\Mail\PasswordRecovery;
 use App\Models\Candidato;
 use App\Models\PadronElectoral;
 use App\Models\User;
@@ -13,6 +14,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class Controller extends BaseController
 {
@@ -148,5 +150,56 @@ class Controller extends BaseController
     public function consultaDemarcacionesCandidato($municipio_id){
         $demarcaciones = Demarcaciones::where("municipio_id",$municipio_id)->get();
         return $demarcaciones;
+    }
+
+    public function solicitaCambioPass(Request $request){
+        try {
+            $user = User::where("email",'like',$request->email)->first();
+
+            if($user != null){
+                $token = $this->generaToken(50);
+                $user->pass_token = $token;
+                $user->save();
+                Mail::to($user->email)->send(new PasswordRecovery($user));
+                $respuesta = ["code"=>200];
+            }else{
+                $respuesta = ["code"=>202];
+            }
+        }catch (Exception $e){
+            $respuesta = ["code"=>500, "error"=>$e];
+        }
+        return $respuesta;
+    }
+
+    public function cambiarContrasena(Request $request){
+        try {
+
+            if($request->token == null){
+                return ["code"=>202];
+            }
+            $user = User::where("pass_token", "like",$request->token)->first();
+            if($user != null){
+                $user->password = bcrypt($request->password);
+                $user->pass_token = null;
+                $user->save();
+
+                return ["code"=>200];
+            }else{
+                return ["code"=>202];
+            }
+
+
+        }catch (Exception $e){
+            return ["code"=>500, "error"=>$e->getMessage()];
+
+        }
+    }
+
+    public function generaToken($tamano){
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz---------'.
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz----------'.
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz----------'.
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz----------';
+        return substr(str_shuffle($characters),0, $tamano);
     }
 }
