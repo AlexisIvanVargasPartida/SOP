@@ -48,15 +48,41 @@ class Controller extends BaseController
     }
 
     //obtienes lista de municipios
-    public function getMunicipios($idEntidad,$idCandidato){
-        $candidato = DB::table("candidato")->find($idCandidato);
-        $muns = json_decode($candidato->configuacion, true)['registros'];
-        $data = DB::table('municipios')
-            ->whereIn('clave_municipio', $muns)
-            ->get(['id', 'clave_municipio', 'nombre'])
-            ->toArray();
-        $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
-        return ["municipios"=>$municipios,"municipio"=>$data];
+    public function getMunicipios(Request $request,$idEntidad,$idCandidato){
+        $user = User::find($request->id);
+
+        if($user->coordinador == "S"){
+            $candidato =  Coordinador::find($user->candidato_id);
+            $municipios = json_decode($candidato->configuracion, true)['registros'];
+            $arr = explode("-",$municipios);
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('municipios')
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+                $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('municipios')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+                $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+            }
+
+            return ["municipios"=>$municipios,"municipio"=>$data];
+        }else{
+            $candidato = DB::table("candidato")->find($idCandidato);
+            $muns = json_decode($candidato->configuacion, true)['registros'];
+            $data = DB::table('municipios')
+                ->whereIn('clave_municipio', $muns)
+                ->get(['id', 'clave_municipio', 'nombre'])
+                ->toArray();
+            $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+            return ["municipios"=>$municipios,"municipio"=>$data];
+        }
+
     }
     //obtienes lista de secciones por municipio
     public function getSecciones($entidad,$claveMunicipio,$candidato,Request $request){
@@ -93,14 +119,30 @@ class Controller extends BaseController
                 return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>false];
             }else{
                 $sec = json_decode($c->configuracion, true)['registros'];
-                $arr = explode("-",$sec[0]);
-                $sec = $arr[2];
-                array_push($secciones,"Seccion $sec");
-                array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
-                array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
-                array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
-                array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
-                return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>true];
+                $arr = explode("-",$sec);
+                if(count($arr) == 3){
+                    $sec = $arr[2];
+                    array_push($secciones,"Seccion $sec");
+                    array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO DECIDE"));
+                    array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO LO CONOZCO"));
+                    array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "NO"));
+                    array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$sec, $candidato, "SI"));
+                    return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>0,"coordinador"=>true];
+                }elseif (count($arr) == 2) {
+                    $muni = $arr[1];
+                    $sec = DB::table("secciones")->where("clave_municipio",$muni)->paginate(10);
+                    $seccions = DB::table("secciones")->where("clave_municipio",$muni)->count();
+                    $pages = round($seccions/10);
+                    foreach ($sec as $seccion){
+                        array_push($secciones,"Seccion $seccion->seccion");
+                        array_push($nd,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO DECIDE"));
+                        array_push($nnc,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO LO CONOZCO"));
+                        array_push($ns,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "NO"));
+                        array_push($s,$this->consultaSimpatizantes($entidad, $claveMunicipio,$seccion->seccion, $candidato, "SI"));
+                    }
+                    return ["secciones"=>$secciones, "nd"=>$nd, "nnc"=>$nnc, "ns"=>$ns, "s"=>$s,"pages"=>$pages,"coordinador"=>false];
+                }
+
             }
         }else{
             $sec = DB::table("secciones")->where("clave_municipio",$claveMunicipio)->paginate(10);

@@ -381,6 +381,9 @@ export default {
             "?page=" +
             page,
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token,

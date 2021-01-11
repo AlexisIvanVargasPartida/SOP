@@ -37,6 +37,7 @@ class Registro extends Controller
         ])->validate();
 
         if($request->coordinador == "true"){
+
             $jsonData = [
                 "partido" => $request->partido,
                 "ce" => $request->ce,
