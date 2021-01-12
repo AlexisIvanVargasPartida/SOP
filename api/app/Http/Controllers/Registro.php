@@ -56,7 +56,7 @@ class Registro extends Controller
             $jsonData = [
                 "partido" => $request->partido,
                 "ce" => $request->ce,
-                "registros" => $this->generaArrayRegistros($request->values)
+                "registros" => $request->values
             ];
             $candidato = Candidato::create(['nombre' => $request->nombre, 'configuacion' => json_encode($jsonData)]);
             User::create(['name' => $request->nombre, 'email' => $request->email, 'username' => null, 'password' => bcrypt($request->password), 'candidato_id' => $candidato->id, "role_id" => 1, "coordinador"=>"N"]);

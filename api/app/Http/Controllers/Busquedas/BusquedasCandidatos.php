@@ -87,10 +87,20 @@ class BusquedasCandidatos extends Controller
         }else{
             $candidato = DB::table("candidato")->find($user->candidato_id);
             $muns = json_decode($candidato->configuacion, true)['registros'];
-            $data = DB::table('secciones')
-                ->whereIn('clave_municipio', $muns)
-                ->get(['id', 'seccion'])
-                ->toArray();
+            $arr = explode("-",$muns);
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('secciones')
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'seccion'])
+                    ->toArray();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('secciones')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->get(['id', 'seccion'])
+                    ->toArray();
+            }
             return response()->json(["data" => $data], 200);
         }
 
@@ -106,11 +116,10 @@ class BusquedasCandidatos extends Controller
 
         $candidato =  DB::table('candidato')->find($id);
         $configCandidato = json_decode($candidato->configuacion, true)['registros'];
-        $entidades = array_keys($configCandidato);
-
+        $arr = explode("-",$configCandidato."");
 
         $data = DB::table('entidades_federales')
-            ->whereIn('id', $entidades)
+            ->where('id', $arr[0])
             ->get(['id', 'nombre'])
             ->toArray();
 
@@ -154,13 +163,22 @@ class BusquedasCandidatos extends Controller
             return response()->json(["data" => $data], 200);
         }else {
             $candidato =  DB::table('candidato')->find($id);
-            $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
-
-            $data = DB::table('municipios')
-                ->where('clave_entidad_federal', $entidad)
-                ->whereIn('clave_municipio', $municipios)
-                ->get(['id', 'clave_municipio', 'nombre'])
-                ->toArray();
+            $municipios = json_decode($candidato->configuacion, true)['registros'];
+            $arr = explode("-",$municipios."");
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('municipios')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }elseif (count($arr) == 1){
+                $ent = $arr[0];
+                $data = DB::table('municipios')
+                    ->where('clave_entidad_federal', $ent)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }
 
             return response()->json(["data" => $data], 200);
         }
@@ -263,17 +281,43 @@ class BusquedasCandidatos extends Controller
         }else{
             //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
-            Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
+            /*Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio_id" => $municipio_id]), [
                 'id' => 'required|integer|exists:candidato,id',
                 'entidad' => 'required|integer',
                 'municipio_id' => 'required|integer'
-            ])->validate();
+            ])->validate();*/
 
             $candidato =  DB::table('candidato')->find($id);
             $municipio =  DB::table('municipios')->find($municipio_id);
-            $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
-
-            if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
+            $municipios = json_decode($candidato->configuacion, true)['registros'];
+            $arr = explode("-",$municipios);
+            $data = [];
+            if(count($arr) == 1){
+                $ent = $arr[0];
+                $data = DB::table('secciones')
+                    ->where('clave_entidad_federal', $ent)
+                    ->where('clave_municipio', $municipio_id)
+                    ->get(['id', 'seccion', 'tipo'])
+                    ->toArray();
+            }
+            if(count($arr) == 2){
+                $muni = $arr[1];
+                $data = DB::table('secciones')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'seccion', 'tipo'])
+                    ->toArray();
+            }
+            if(count($arr) == 3){
+                $sec = $arr[2];
+                $data = DB::table('secciones')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->where('clave_municipio', $municipio_id)
+                    ->where('seccion', $sec)
+                    ->get(['id', 'seccion', 'tipo'])
+                    ->toArray();
+            }
+            //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);
 
             $data = DB::table('secciones')
                 ->where('clave_entidad_federal', $entidad)
@@ -312,7 +356,6 @@ class BusquedasCandidatos extends Controller
         if($municipio_id != "null"){
             $municipio =  DB::table('municipios')->find($municipio_id);
         }
-        $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
 
 
         //if (!in_array($municipio->clave_municipio, $municipios)) return response()->json(["data" => "No tiene Permisos del municipio"], 401);

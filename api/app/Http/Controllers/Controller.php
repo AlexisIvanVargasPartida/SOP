@@ -85,10 +85,22 @@ class Controller extends BaseController
         }else{
             $candidato = DB::table("candidato")->find($idCandidato);
             $muns = json_decode($candidato->configuacion, true)['registros'];
-            $data = DB::table('municipios')
-                ->whereIn('clave_municipio', $muns)
-                ->get(['id', 'clave_municipio', 'nombre'])
-                ->toArray();
+            $arr = explode("-",$muns);
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('municipios')
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+                $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('municipios')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+                $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+            }
             $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
             return ["municipios"=>$municipios,"municipio"=>$data];
         }
@@ -192,10 +204,16 @@ class Controller extends BaseController
     }
 
     public function getMunicipiosCandidato($id){
-        $candidato = DB::table("candidato")->find($id);
-        $registro = json_decode($candidato->configuacion, true)['registros'];
-        $entidad = key($registro);
-        $municipios = DB::table("municipios")->where("clave_entidad_federal",$entidad)->get();
+        $user = User::where("candidato_id",$id)->where("coordianador","like","N")->first();
+        if($user == null){
+            $candidato = DB::table("coordinador")->find($id);
+            $registro = json_decode($candidato->configuracion, true)['registros'];
+        }else{
+            $candidato = DB::table("candidato")->find($id);
+            $registro = json_decode($candidato->configuacion, true)['registros'];
+        }
+        $arr = explode("-",$registro);
+        $municipios = DB::table("municipios")->where("clave_entidad_federal",$arr[0])->get();
         return $municipios;
     }
 
