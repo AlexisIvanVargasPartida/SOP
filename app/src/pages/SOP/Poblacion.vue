@@ -1,5 +1,5 @@
 <template>
-  <div class="md-layout">
+  <div class="md-layout" id="app">
     <div
       class="md-layout-item md-medium-size-100 md-small-size-100"
       :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
@@ -83,7 +83,7 @@
         </md-card-content>
       </md-card>
     </div>
-    <div class="md-layout-item md-size-100">
+    <div class="md-layout-item md-size-100" ref="content">
       <md-card>
         <md-card-content>
           <md-table
@@ -237,6 +237,9 @@
           ></md-progress-spinner>
         </template>
       </modal>
+      <center>
+     <button class="btn"  hidden @click="genPDF">Descargar PDF</button>
+     </center>
     </div>
   </div>
 </template>
@@ -249,7 +252,10 @@ import Fuse from "fuse.js";
 import { Modal } from "@/components";
 import Simpatizante from "./Forms/Simpatiza";
 import { Badge } from "@/components";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 export default {
+  name:'app',
   components: {
     Pagination,
     Modal,
@@ -588,6 +594,18 @@ export default {
           cObject.$helpers.catchError(error);
         });
     },
+     genPDF(){
+       const doc=new jsPDF();
+       const html=this.$refs.content.innerHTML;
+       
+       doc.fromHTML(html,15,15,{
+         width:150
+       })
+       doc.save("tabla.pdf");
+      //let pdf=new jsPDF();
+      //pdf.autoTable({html:'#tabla'});
+      //pdf.save('tabla.pdf');
+    },
     
    
   },
@@ -621,6 +639,7 @@ export default {
     }
   }
 };
+
 </script>
 
 <style lang="css" scoped>

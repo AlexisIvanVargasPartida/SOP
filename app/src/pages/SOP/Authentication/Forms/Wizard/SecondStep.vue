@@ -62,7 +62,7 @@
           :default-expand-level="0"
           :show-count="true"
           :always-open="true"
-          :multiple="!coordinador"
+          :multiple="false"
           :options="options"
           @input="sendData('values', values)"
         >

@@ -103,7 +103,6 @@
               name="municipio"
               id="municipio"
               @input="selected()"
-              disabled
               ><md-option
                 v-for="mun in selMunicipios"
                 :key="mun.id"

@@ -45,13 +45,55 @@ class BusquedasCandidatos extends Controller
 
     public function getColoniasSecciones($cve_municipio, $colonia)
     {
-        $data = DB::table('secciones_colonias')
+        $data = DB::table('secciones')
             ->where('clave_municipio', $cve_municipio)
-            ->where('nombre', $colonia)
+            //->where('nombre', $colonia)
             ->get(['id', 'seccion'])
             ->toArray();
 
         return response()->json(["data" => $data], 200);
+    }
+
+    public function getSeccionesUsuario(Request $request,$id)
+    {
+        $user = User::find($id);
+        if($user->coordinador == "S"){
+            $candidato =  Coordinador::find($user->candidato_id);
+            $municipios = json_decode($candidato->configuracion, true)['registros'];
+            $arr = explode("-",$municipios);
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('secciones')
+                    ->where('clave_municipio', $muni)
+                    ->get(['id', 'seccion'])
+                    ->toArray();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('secciones')
+                    ->where('clave_entidad_federal', $entidad)
+                    ->get(['id', 'seccion'])
+                    ->toArray();
+            }
+
+            if($user->co_de == "S"){
+                $demarcacion_id = $user->demarcacion;
+                $demarcacion = Demarcaciones::find($demarcacion_id);
+                $data = DB::table('secciones')
+                    ->where('clave_municipio', $demarcacion->municipio_id)
+                    ->get(['id', 'seccion'])
+                    ->toArray();
+            }
+            return response()->json(["data" => $data], 200);
+        }else{
+            $candidato = DB::table("candidato")->find($user->candidato_id);
+            $muns = json_decode($candidato->configuacion, true)['registros'];
+            $data = DB::table('secciones')
+                ->whereIn('clave_municipio', $muns)
+                ->get(['id', 'seccion'])
+                ->toArray();
+            return response()->json(["data" => $data], 200);
+        }
+
     }
 
     public function candidatoEntidades(Request $request, $id)
@@ -100,6 +142,15 @@ class BusquedasCandidatos extends Controller
                     ->get(['id', 'clave_municipio', 'nombre'])
                     ->toArray();
             }
+            if($user->co_de == "S"){
+                $demarcacion_id = $user->demarcacion;
+                $demarcacion = Demarcaciones::find($demarcacion_id);
+                $data = DB::table('municipios')
+                    ->where('clave_municipio', $demarcacion->municipio_id)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }
+
             return response()->json(["data" => $data], 200);
         }else {
             $candidato =  DB::table('candidato')->find($id);

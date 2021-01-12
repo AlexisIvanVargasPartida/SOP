@@ -29,6 +29,7 @@ Route::get('/get/demarcaciones/{municipio_id}', 'Controller@consultaDemarcacione
 Route::get('/get/candidatos/all', 'Controller@getCandidatos');
 Route::post('/login', 'Users\UsersController@login');
 Route::get('/comprueba/cve/electoral', 'Simpatizantes@compruebaClave');
+Route::get('/secciones/usuario/{id}', 'Busquedas\BusquedasCandidatos@getSeccionesUsuario');
 
 Route::post('/solicita/cambio/pass', 'Controller@solicitaCambioPass');
 Route::post('/cambiar/password', 'Controller@cambiarContrasena');

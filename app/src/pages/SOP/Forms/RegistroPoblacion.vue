@@ -25,7 +25,6 @@
                       type="text"
                       @change="
                         sendData('nombre', nombre);
-                        generaCE();
                       "
                       @keyup.prevent="
                         nombre = $helpers.todasMayusculas($event.target.value)
@@ -52,7 +51,7 @@
                       type="text"
                       @change="
                         sendData('apellidop', apellidop);
-                        generaCE();
+                      
                       "
                       @keyup.prevent="
                         apellidop = $helpers.todasMayusculas(
@@ -81,7 +80,6 @@
                       type="text"
                       @change="
                         sendData('apellidom', apellidom);
-                        generaCE();
                       "
                       @keyup.prevent="
                         apellidom = $helpers.todasMayusculas(
@@ -116,7 +114,6 @@
                       type="text"
                       @change="
                         sendData('day', day);
-                        generaCE();
                       "
                     >
                     </md-input>
@@ -141,7 +138,6 @@
                       id="month"
                       @input="
                         sendData('month', month);
-                        generaCE();
                       "
                     >
                       <md-option value="1">Enero</md-option>
@@ -177,7 +173,6 @@
                       type="text"
                       @change="
                         sendData('year', year);
-                        generaCE();
                       "
                     >
                     </md-input>
@@ -202,7 +197,6 @@
                       id="nacimiento"
                       @input="
                         sendData('nacimiento', nacimiento);
-                        generaCE();
                       "
                     >
                       <md-option
@@ -234,7 +228,6 @@
                       id="sexo"
                       @input="
                         sendData('sexo', sexo);
-                        generaCE();
                       "
                     >
                       <md-option value="H">Hombre</md-option>
@@ -248,13 +241,13 @@
               >
                 <ValidationProvider
                   name="ce"
-                  rules="required|min:15|max:15|clve"
+                  rules="required"
                   v-slot="{ passed, failed }"
                 >
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Clave Elector</label>
+                    <label>Clave Elector </label>
                     <md-input
                       v-model="ce"
                       type="text"

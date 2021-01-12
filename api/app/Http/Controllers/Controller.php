@@ -71,6 +71,16 @@ class Controller extends BaseController
                 $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
             }
 
+            if($user->co_de == "S"){
+                $demarcacion_id = $user->demarcacion;
+                $demarcacion = Demarcaciones::find($demarcacion_id);
+                $data = DB::table('municipios')
+                    ->where('clave_municipio', $demarcacion->municipio_id)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+                $municipios = DB::table("municipios")->where("clave_entidad_federal",$idEntidad)->get();
+
+            }
             return ["municipios"=>$municipios,"municipio"=>$data];
         }else{
             $candidato = DB::table("candidato")->find($idCandidato);

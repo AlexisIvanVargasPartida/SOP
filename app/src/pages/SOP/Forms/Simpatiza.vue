@@ -64,16 +64,53 @@
                 <md-radio
                   v-model="participacion"
                   value="Solo Simpatizo"
-                  @change="sendData('participacion', participacion)"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);"
                   >Sólo Simpatizo</md-radio
                 >
                 <md-radio
                   v-model="participacion"
-                  @change="sendData('participacion', participacion)"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);"
                   value="Promotor"
                   class="md-primary"
                   >Promotor</md-radio
                 >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);"
+                  value="Gestor"
+                  class="md-primary"
+                  >Gestor de Familia</md-radio
+                >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);"
+                  value="CoordinadorD"
+                  class="md-primary"
+                  >Coordinador de Demarcación</md-radio
+                >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(true);"
+                  value="Jefe"
+                  class="md-primary"
+                  >Jefe de Sección</md-radio 
+                >
+              <div v-if="jefe">
+              <md-select
+              v-model="seccion"
+              name="seccion"
+              id="seccion"
+              @input="sendData('jefe_seccion', seccion)"
+              ><md-option v-for="(se, id) in secciones" :key="id" :value="se.id"
+                >Sección {{ se.seccion }}</md-option
+              >
+            </md-select>
+            </div>
               </div>
               <label
                 v-if="simpatiza == 'NO'"
@@ -106,6 +143,7 @@
                   class="md-primary"
                   >Deseo Esperar</md-radio
                 >
+             
               </div>
 
               <label
@@ -160,12 +198,35 @@ export default {
       simpatiza: "",
       participacion: "",
       negativa: "",
-      likeconocer: ""
+      likeconocer: "",
+      jefe:false,
+      secciones:[],
+      seccion:""
     };
   },
   methods: {
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
+    },
+    selJefe(val){
+    this.jefe=val;
+    if(val==true){
+      let cObject=this;
+       axios
+        .get(APIURL + "secciones/usuario/" + this.$store.state.sop.user.idusr, {
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          cObject.secciones = response.data.data;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    }
+
+
     },
     validate() {
       return this.$refs.form.validate().then(res => {
