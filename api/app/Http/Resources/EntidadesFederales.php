@@ -19,12 +19,11 @@ class EntidadesFederales extends JsonResource
         if($request->coordinador == "true"){
             $candidato = Candidato::find($request->id);
             $registro = json_decode($candidato->configuacion, true)['registros'];
-            $entidades = current($registro);
-            if(count($entidades) > 1){
-                $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
+            $arr = explode("-",$registro);
+            if(count($arr) == 1){
+                $temp=DB::table('municipios')->where('clave_entidad_federal', $arr[0])->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
             }else{
-                $entidad = current($entidades);
-                $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->where("id",$entidad)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
+                $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->where("id",$arr[1])->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);
             }
         }else{
             $temp=DB::table('municipios')->where('clave_entidad_federal', $this->id)->get([DB::raw('CONCAT (clave_entidad_federal,"-",clave_municipio) as id'), 'nombre as label',"id as idmun"]);

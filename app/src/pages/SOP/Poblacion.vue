@@ -1,6 +1,6 @@
-<template>
-  <div class="md-layout" id="app">
-    <div
+<template >
+  <div class="md-layout" id="page" >
+    <div 
       class="md-layout-item md-medium-size-100 md-small-size-100"
       :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
       v-if="entidades.length > 1"
@@ -33,6 +33,8 @@
     <div
       class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
       :class="entidades.length > 1 ? 'md-size-33' : 'md-size-50'"
+
+      
     >
       <md-card>
         <md-card-header class="md-card-header-icon md-card-header-green">
@@ -83,15 +85,17 @@
         </md-card-content>
       </md-card>
     </div>
-    <div class="md-layout-item md-size-100" ref="content">
-      <md-card>
-        <md-card-content>
+    <div class="md-layout-item md-size-100" ref="content" >
+      <md-card >
+        <md-card-content >
           <md-table
             :value="queriedData"
             :md-sort.sync="currentSort"
             :md-sort-order.sync="currentSortOrder"
             :md-sort-fn="customSort"
             class="paginated-table table-striped table-hover"
+            id="printTable"
+           
           >
             <md-table-toolbar>
               <md-field>
@@ -160,7 +164,7 @@
               </md-table-cell>
             </md-table-row>
           </md-table>
-          <div class="footer-table md-table" v-if="queriedData.length > 0">
+          <div class="footer-table md-table"  v-if="queriedData.length > 0">
             <table>
               <tfoot>
                 <tr>
@@ -238,7 +242,7 @@
         </template>
       </modal>
       <center>
-     <button class="btn"  hidden @click="genPDF">Descargar PDF</button>
+     <button  id="btn" @click="genPDF" class="btn btn-success">Descargar Datos de la tabla</button>
      </center>
     </div>
   </div>
@@ -253,9 +257,12 @@ import { Modal } from "@/components";
 import Simpatizante from "./Forms/Simpatiza";
 import { Badge } from "@/components";
 import jsPDF from 'jspdf';
+import html2PDF from 'jspdf-html2canvas';
+import html2canvas from 'html2canvas';
 import autoTable from 'jspdf-autotable';
+import pdfMake from 'pdfmake';
+import pdfFonts from 'pdfmake';
 export default {
-  name:'app',
   components: {
     Pagination,
     Modal,
@@ -595,17 +602,69 @@ export default {
         });
     },
      genPDF(){
-       const doc=new jsPDF();
-       const html=this.$refs.content.innerHTML;
+
+       /*
+   let divToPrint=document.getElementById("printTable");
+   let newWin= window.open("");
+   newWin.document.write(divToPrint.outerHTML);
+   newWin.print();
+   newWin.close();
+   printData();
+    
+}
+*/
+
+
+
+
+
+    
+   
+
+
+ html2canvas(document.body).then(canvas => {
+    let pdf = new jsPDF('p', 'pt', 'a4');
+    var width = pdf.internal.pageSize.getWidth();
+    var height = pdf.internal.pageSize.getHeight();
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG',  0, 0, width, height);
+    pdf.save(); 
+});
+     }
+   /* let pdf = new jsPDF();
+    let element = document.getElementById('page');
+    let width= element.style.width;
+    let height = element.style.height;
+    html2canvas(element).then(canvas => {
+        let image = canvas.toDataURL('image/png');
+        pdf.addImage(image, 'JPEG', width, height);
+        pdf.save('page.pdf');
+    }); */
        
-       doc.fromHTML(html,15,15,{
-         width:150
-       })
-       doc.save("tabla.pdf");
+//let page = document.getElementById('page');
+
+ // html2PDF(page, {
+  //  jsPDF: {
+  //    format: 'a4',
+   // },
+   // imageType: 'image/jpeg',
+   // output: './pdf/generate.pdf'
+  //});
+
+
+       //const doc=new jsPDF();
+       //const html=this.$refs.content.innerHTML;
+       
+       //doc.fromHTML(html,15,15,{
+       //  width:150
+       //})
+       //doc.save("tabla.pdf");
+
+
+
       //let pdf=new jsPDF();
       //pdf.autoTable({html:'#tabla'});
       //pdf.save('tabla.pdf');
-    },
+  
     
    
   },

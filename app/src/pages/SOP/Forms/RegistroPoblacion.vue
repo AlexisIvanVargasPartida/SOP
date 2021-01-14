@@ -25,6 +25,7 @@
                       type="text"
                       @change="
                         sendData('nombre', nombre);
+                         generaCE();
                       "
                       @keyup.prevent="
                         nombre = $helpers.todasMayusculas($event.target.value)
@@ -51,6 +52,7 @@
                       type="text"
                       @change="
                         sendData('apellidop', apellidop);
+                         generaCE();
                       
                       "
                       @keyup.prevent="
@@ -80,6 +82,7 @@
                       type="text"
                       @change="
                         sendData('apellidom', apellidom);
+                         generaCE();
                       "
                       @keyup.prevent="
                         apellidom = $helpers.todasMayusculas(
@@ -114,6 +117,7 @@
                       type="text"
                       @change="
                         sendData('day', day);
+                         generaCE();
                       "
                     >
                     </md-input>
@@ -138,6 +142,7 @@
                       id="month"
                       @input="
                         sendData('month', month);
+                         generaCE();
                       "
                     >
                       <md-option value="1">Enero</md-option>
@@ -173,6 +178,7 @@
                       type="text"
                       @change="
                         sendData('year', year);
+                         generaCE();
                       "
                     >
                     </md-input>
@@ -197,6 +203,7 @@
                       id="nacimiento"
                       @input="
                         sendData('nacimiento', nacimiento);
+                         generaCE();
                       "
                     >
                       <md-option
@@ -228,6 +235,7 @@
                       id="sexo"
                       @input="
                         sendData('sexo', sexo);
+                         generaCE();
                       "
                     >
                       <md-option value="H">Hombre</md-option>

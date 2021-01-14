@@ -204,14 +204,9 @@ class Controller extends BaseController
     }
 
     public function getMunicipiosCandidato($id){
-        $user = User::where("candidato_id",$id)->where("coordianador","like","N")->first();
-        if($user == null){
-            $candidato = DB::table("coordinador")->find($id);
-            $registro = json_decode($candidato->configuracion, true)['registros'];
-        }else{
-            $candidato = DB::table("candidato")->find($id);
-            $registro = json_decode($candidato->configuacion, true)['registros'];
-        }
+
+        $candidato = DB::table("candidato")->find($id);
+        $registro = json_decode($candidato->configuacion, true)['registros'];
         $arr = explode("-",$registro);
         $municipios = DB::table("municipios")->where("clave_entidad_federal",$arr[0])->get();
         return $municipios;

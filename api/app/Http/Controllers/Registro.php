@@ -69,8 +69,8 @@ class Registro extends Controller
         if($request->coordinador == "true"){
             $candidato = Candidato::find($request->id);
             $registro = json_decode($candidato->configuacion, true)['registros'];
-            $entidad = key($registro);
-            $entidades = DB::table('entidades_federales')->where("id",$entidad)->get();
+            $arr = explode("-",$registro);
+            $entidades = DB::table('entidades_federales')->where("id",$arr[0])->get();
         }else{
             $entidades = DB::table('entidades_federales')->get();
         }

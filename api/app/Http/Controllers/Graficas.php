@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PadronElectoral;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -11,22 +12,38 @@ class Graficas extends Controller
 {
     public function candidatoMunicipios(Request $request, $id, $entidad, $filter)
     {
-        if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
+        //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);
 
-        Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "filtro" => $filter]), [
+        /*Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "filtro" => $filter]), [
             'id' => 'required|integer|exists:candidato,id',
             'entidad' => 'required|integer',
             'filtro' => 'required|string|in:all,simpatizantes,nosimpatizantes,noconocen,nodeciden'
-        ])->validate();
+        ])->validate();*/
 
-        $candidato =  DB::table('candidato')->find($id);
-        $municipios = json_decode($candidato->configuacion, true)['registros'][$entidad];
+        $user = User::where("candidato_id",$id)->where("coordinador",'like',"N")->first();
+        if($user != null){
+            $candidato =  DB::table('candidato')->find($id);
+            $config = json_decode($candidato->configuacion, true)['registros'];
+        }else{
+            $candidato =  DB::table('coordinador')->find($id);
+            $config = json_decode($candidato->configuracion, true)['registros'];
+        }
 
-        $municipiosData = DB::table('municipios')
-            ->where('clave_entidad_federal', $entidad)
-            ->whereIn('clave_municipio', $municipios)
-            ->get(['id', 'clave_municipio', 'nombre'])
-            ->toArray();
+        $reg = explode("-",$config);
+
+        if(count($reg) == 3 || count($reg) == 2){
+            $municipiosData = DB::table('municipios')
+                ->where('clave_entidad_federal', $reg[0])
+                ->where('clave_municipio', $reg[1])
+                ->get(['id', 'clave_municipio', 'nombre'])
+                ->toArray();
+        }elseif (count($reg) == 1) {
+            $municipiosData = DB::table('municipios')
+                ->where('clave_entidad_federal', $reg[0])
+                ->get(['id', 'clave_municipio', 'nombre'])
+                ->toArray();
+        }
+
 
         $data = [];
         $tipoFiltro = ["simpatizantes" => "SI", "nosimpatizantes" => "NO", "noconocen" => "NO LO CONOZCO", "nodeciden" => "NO DECIDE",];
@@ -44,7 +61,7 @@ class Graficas extends Controller
             }
         }
         if ($filter != "all") {
-            $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $municipios, $userString, $tipoFiltro[$filter]);
+            $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $reg[1], $userString, $tipoFiltro[$filter]);
         }
         return response()->json(["data" => $data], 200);
     }
@@ -115,7 +132,7 @@ class Graficas extends Controller
                 ->where("sc.candidato_id", $candidato_id);
         })
             ->where("entidad", $entidad)
-            ->whereIn('municipio', $municipios)
+            ->where('municipio', $municipios)
             ->when($filter == true, function ($q) use ($simpatiza) {
                 return $q->where("sc.simpatiza", $simpatiza);
             })
