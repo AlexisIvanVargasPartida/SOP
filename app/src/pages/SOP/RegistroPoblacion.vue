@@ -104,7 +104,8 @@ export default {
         participacion: this.data.participacion || null,
         likeconocer: this.data.likeconocer || null,
         redsocial: this.data.redsocial || null,
-        jefe_seccion:this.data.jefe_seccion || null
+        jefe_seccion:this.data.jefe_seccion || null,
+        coord_dem:this.data.coord_dem || null
       };
 
       dataCandidato.telefonos.push(this.data.telefono);
@@ -129,6 +130,7 @@ export default {
             cp: this.data.cp,
             seccion: this.data.seccion,
             jefe_seccion:this.data.jefe_seccion,
+            coord_dem:this.data.coord_dem,
             simpatiza: this.data.simpatiza,
             year: this.data.year,
             month: this.data.month,

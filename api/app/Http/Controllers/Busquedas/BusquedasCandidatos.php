@@ -106,6 +106,58 @@ class BusquedasCandidatos extends Controller
 
     }
 
+    public function getDemarcacionesUsuario(Request $request,$id)
+    {
+        $user = User::find($id);
+        if($user->coordinador == "S"){
+            $candidato =  Coordinador::find($user->candidato_id);
+            $municipios = json_decode($candidato->configuracion, true)['registros'];
+            $arr = explode("-",$municipios);
+
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('demarcaciones')
+                    ->where('municipio_id', $muni)
+                    ->get(['id', 'demarcacion', "secciones"])
+                    ->toArray();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('demarcaciones')
+                    ->get(['id', 'demarcacion', "secciones"])
+                    ->toArray();
+            }
+
+            if($user->co_de == "S"){
+                $ar = explode(":",$arr[0]);
+                $data = DB::table('demarcaciones')->find($ar[1]);
+                $data = DB::table('demarcaciones')
+                    ->where('municipio_id', $data->municipio_id)
+                    ->get(['id', 'demarcacion', "secciones"])
+                    ->toArray();
+            }
+
+            return response()->json(["data" => $data], 200);
+        }else{
+            $candidato = DB::table("candidato")->find($user->candidato_id);
+            $muns = json_decode($candidato->configuacion, true)['registros'];
+            $arr = explode("-",$muns);
+            if(count($arr) == 2 || count($arr) == 3){
+                $muni = $arr[1];
+                $data = DB::table('demarcaciones')
+                    ->where('municipio_id', $muni)
+                    ->get(['id', 'demarcacion', "secciones"])
+                    ->toArray();
+            }elseif (count($arr) == 1){
+                $entidad = $arr[0];
+                $data = DB::table('demarcaciones')
+                    ->get(['id', 'demarcacion', "secciones"])
+                    ->toArray();
+            }
+            return response()->json(["data" => $data], 200);
+        }
+
+    }
+
     public function candidatoEntidades(Request $request, $id)
     {
         //if ($request->user()->candidato_id != $id) return response()->json(["data" => "No tiene Permisos"], 401);

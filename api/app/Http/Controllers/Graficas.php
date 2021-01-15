@@ -19,49 +19,77 @@ class Graficas extends Controller
             'entidad' => 'required|integer',
             'filtro' => 'required|string|in:all,simpatizantes,nosimpatizantes,noconocen,nodeciden'
         ])->validate();*/
-
-        $user = User::where("candidato_id",$id)->where("coordinador",'like',"N")->first();
-        if($user != null){
+        $user = User::find($request->id);
+        if($user->coordinador != "S"){
             $candidato =  DB::table('candidato')->find($id);
             $config = json_decode($candidato->configuacion, true)['registros'];
+            $reg = explode("-",$config);
+
+            if(count($reg) == 3 || count($reg) == 2){
+                $municipiosData = DB::table('municipios')
+                    ->where('clave_entidad_federal', $reg[0])
+                    ->where('clave_municipio', $reg[1])
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }elseif (count($reg) == 1) {
+                $municipiosData = DB::table('municipios')
+                    ->where('clave_entidad_federal', $reg[0])
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }
         }else{
-            $candidato =  DB::table('coordinador')->find($id);
+
+            $candidato =  DB::table('coordinador')->find($user->candidato_id);
             $config = json_decode($candidato->configuracion, true)['registros'];
+
+            $reg = explode("-",$config);
+            $municipio = "";
+            if($user->co_de == "S"){
+                $ar = explode(":",$reg[0]);
+                $data = DB::table('demarcaciones')->find($ar[1]);
+                $municipio = $data->municipio_id;
+                $municipiosData = DB::table('municipios')
+                    ->where('clave_municipio', $data->municipio_id)
+                    ->get(['id', 'clave_municipio', 'nombre'])
+                    ->toArray();
+            }else{
+                if(count($reg) == 3 || count($reg) == 2){
+                    $municipio = $reg[1];
+                    $municipiosData = DB::table('municipios')
+                        ->where('clave_entidad_federal', $reg[0])
+                        ->where('clave_municipio', $reg[1])
+                        ->get(['id', 'clave_municipio', 'nombre'])
+                        ->toArray();
+                }elseif (count($reg) == 1) {
+                    $municipiosData = DB::table('municipios')
+                        ->where('clave_entidad_federal', $reg[0])
+                        ->get(['id', 'clave_municipio', 'nombre'])
+                        ->toArray();
+                }
+            }
         }
 
-        $reg = explode("-",$config);
 
-        if(count($reg) == 3 || count($reg) == 2){
-            $municipiosData = DB::table('municipios')
-                ->where('clave_entidad_federal', $reg[0])
-                ->where('clave_municipio', $reg[1])
-                ->get(['id', 'clave_municipio', 'nombre'])
-                ->toArray();
-        }elseif (count($reg) == 1) {
-            $municipiosData = DB::table('municipios')
-                ->where('clave_entidad_federal', $reg[0])
-                ->get(['id', 'clave_municipio', 'nombre'])
-                ->toArray();
-        }
 
 
         $data = [];
         $tipoFiltro = ["simpatizantes" => "SI", "nosimpatizantes" => "NO", "noconocen" => "NO LO CONOZCO", "nodeciden" => "NO DECIDE",];
-        $userString = $request->user()->candidato_id;
+        $userString = $id;
         foreach ($municipiosData as $value) {
             $data["Municipios"][] = $value->id;
             $data["idMunicipios"][$value->id] = $value->nombre;
+
             if ($filter == "all") {
-                $data["Simpatizantes"][] = $this->consultaSimpatizantes($entidad, $value->clave_municipio, $userString, "SI");
-                $data["NoSimpatiza"][] = $this->consultaSimpatizantes($entidad, $value->clave_municipio, $userString, "NO");
-                $data["NoNosConoce"][] = $this->consultaSimpatizantes($entidad, $value->clave_municipio, $userString, "NO LO CONOZCO");
-                $data["NoDecide"][] = $this->consultaSimpatizantes($entidad, $value->clave_municipio, $userString, "NO DECIDE");
+                $data["Simpatizantes"][] = $this->consultaSimpatizantesG($entidad, $value->clave_municipio, $userString, "SI");
+                $data["NoSimpatiza"][] = $this->consultaSimpatizantesG($entidad, $value->clave_municipio, $userString, "NO");
+                $data["NoNosConoce"][] = $this->consultaSimpatizantesG($entidad, $value->clave_municipio, $userString, "NO LO CONOZCO");
+                $data["NoDecide"][] = $this->consultaSimpatizantesG($entidad, $value->clave_municipio, $userString, "NO DECIDE");
             } else {
-                $data["filter"][] = $this->consultaSimpatizantes($entidad, $value->clave_municipio, $userString, $tipoFiltro[$filter]);
+                $data["filter"][] = $this->consultaSimpatizantesG($entidad, $value->clave_municipio, $userString, $tipoFiltro[$filter]);
             }
         }
         if ($filter != "all") {
-            $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $reg[1], $userString, $tipoFiltro[$filter]);
+            $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $municipio, $userString, $tipoFiltro[$filter]);
         }
         return response()->json(["data" => $data], 200);
     }
@@ -120,6 +148,18 @@ class Graficas extends Controller
             ->where("entidad", $entidad)
             ->where("municipio", $clave_municipio)
             ->where("seccion", $seccion)
+            ->where("sc.simpatiza", $simpatiza)
+            ->count();
+        return $count;
+    }
+    public function consultaSimpatizantesG($entidad, $clave_municipio, $user, $simpatiza)
+    {
+        $count = PadronElectoral::join("simpatizantes_candidatos as sc", function ($join) use ($user) {
+            $join->on("sc.padronelectoral_id", "padronelectoral.id")
+                ->where("sc.candidato_id", $user);
+        })
+            ->where("entidad", $entidad)
+            ->where("municipio", $clave_municipio)
             ->where("sc.simpatiza", $simpatiza)
             ->count();
         return $count;

@@ -30,9 +30,12 @@ Route::get('/get/candidatos/all', 'Controller@getCandidatos');
 Route::post('/login', 'Users\UsersController@login');
 Route::get('/comprueba/cve/electoral', 'Simpatizantes@compruebaClave');
 Route::get('/secciones/usuario/{id}', 'Busquedas\BusquedasCandidatos@getSeccionesUsuario');
+Route::get('/demarcaciones/usuario/{id}', 'Busquedas\BusquedasCandidatos@getDemarcacionesUsuario');
+
 
 Route::post('/solicita/cambio/pass', 'Controller@solicitaCambioPass');
 Route::post('/cambiar/password', 'Controller@cambiarContrasena');
+Route::get('/candidato/{id}/{entidad}/grafica/municipios/{filter}', 'Graficas@candidatoMunicipios');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/logout', 'Users\UsersController@logout');
@@ -47,9 +50,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/candidato/{id}/{entidad}/municipios', 'Busquedas\BusquedasCandidatos@candidatoMunicipios');
     Route::get('/candidato/{id}/{entidad}/{municipio_id}/secciones', 'Busquedas\BusquedasCandidatos@candidatoSecciones');
     Route::get('/candidato/{id}/{entidad}/{municipio_id}/{seccion_id}/poblacion', 'Busquedas\BusquedasCandidatos@candidatoPoblacion');
-    
+
     //GRAFICAS
-    Route::get('/candidato/{id}/{entidad}/grafica/municipios/{filter}', 'Graficas@candidatoMunicipios');
     Route::get('/candidato/{id}/{entidad}/grafica/municipios/{municipio}/{filter}', 'Graficas@candidatoMunicipiosFiltro');
     Route::get('/candidato/{id}/{entidad}/{municipio_id}/{seccion_id}/graficas/{filter}', 'Graficas@consultaSimpatizantesDataSeccion');
 
