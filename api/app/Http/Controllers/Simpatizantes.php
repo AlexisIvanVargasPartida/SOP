@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Coordinador;
 use App\Models\PadronElectoral;
 use App\Models\SimpatizantesCandidato;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +15,6 @@ class Simpatizantes extends Controller
 
     public function registroPoblacion(Request $request)
     {
-
         try {
             $getDatos = DB::table('secciones_colonias')->where("id", $request->seccion)->first();
             $localidad = DB::table('localidades_secciones')
@@ -21,6 +22,12 @@ class Simpatizantes extends Controller
                 ->where("clave_municipio", $getDatos->clave_municipio)
                 ->where("seccion", $getDatos->seccion)
                 ->first();
+
+            $simpatizante = PadronElectoral::where("cve_elector",'like',"%$request->cve_elector%")->first();
+
+            if($simpatizante != null){
+                return response()->json(202, 200);
+            }
 
             $data = $request->except('seccion', 'cve_elector', 'simpatiza', 'year', 'month', 'day', 'data');
             $dataCandidato = $request->only('simpatiza', 'data');
@@ -37,10 +44,16 @@ class Simpatizantes extends Controller
             $exist = PadronElectoral::where("cve_elector", "like", $claveElector . "%")->get();
             $claveElector = $claveElector . "000";
             if (count($exist)>0) $claveElector = $exist[0]["cve_elector"];
+            if($request->user()->coordinador == "S"){
+                $coordinador = Coordinador::find($request->user()->candidato_id);
+                $idcandidato = $coordinador->candidato_id;
+            }else{
+                $idcandidato = $request->user()->candidato_id;
+            }
             $row = PadronElectoral::updateOrCreate(['cve_elector' => $claveElector], $data);
             SimpatizantesCandidato::updateOrCreate(
                 [
-                    'candidato_id' => $request->user()->candidato_id,
+                    'candidato_id' => $idcandidato,
                     'padronelectoral_id' => $row->id,
                 ],
                 $dataCandidato
@@ -50,6 +63,14 @@ class Simpatizantes extends Controller
             return response()->json(["error"=>$th->getMessage()], 404);
         }
     }
+
+    public function compruebaClave(Request $request){
+        $simpatizante = PadronElectoral::where("cve_elector",'like',"$request->cve_elector%")->first();
+        if($simpatizante != null){
+            return response()->json(202, 200);
+        }
+    }
+
     public function registroSimpatizante(Request $request)
     {
         Validator::make($request->all(), [

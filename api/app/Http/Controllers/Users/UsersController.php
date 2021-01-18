@@ -29,6 +29,7 @@ class UsersController extends Controller
 
     public function login(Request $request)
     {
+
         Validator::make($request->all(), [
             'email'         => 'string|email|max:40|min:6',
             'password'      => 'required|string|max:20|min:4'
@@ -40,6 +41,7 @@ class UsersController extends Controller
         if ($user->status != User::ACTIVE) {
             return $this->customError("Usuario Inactivo", 401);
         }
+        #dd($this->valid_providers['admin']);
         $scope = $user->getPermissions();
         return $this->sendRequest($request, $this->valid_providers['admin'], $scope);
     }
@@ -47,6 +49,7 @@ class UsersController extends Controller
 
     private function sendRequest($request, $type, $scope)
     {
+
         $request->request->add([
             'scope' => $scope,
             'grant_type' => 'password',
@@ -55,7 +58,6 @@ class UsersController extends Controller
             'username' => Input::get($type),
             'type_username' => $type
         ]);
-
         return Route::dispatch(
             Request::create('/api/oauth/token', 'post')
         );

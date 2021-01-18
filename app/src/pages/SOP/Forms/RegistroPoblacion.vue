@@ -25,7 +25,7 @@
                       type="text"
                       @change="
                         sendData('nombre', nombre);
-                        generaCE();
+                         generaCE();
                       "
                       @keyup.prevent="
                         nombre = $helpers.todasMayusculas($event.target.value)
@@ -52,7 +52,8 @@
                       type="text"
                       @change="
                         sendData('apellidop', apellidop);
-                        generaCE();
+                         generaCE();
+                      
                       "
                       @keyup.prevent="
                         apellidop = $helpers.todasMayusculas(
@@ -81,7 +82,7 @@
                       type="text"
                       @change="
                         sendData('apellidom', apellidom);
-                        generaCE();
+                         generaCE();
                       "
                       @keyup.prevent="
                         apellidom = $helpers.todasMayusculas(
@@ -116,7 +117,7 @@
                       type="text"
                       @change="
                         sendData('day', day);
-                        generaCE();
+                         generaCE();
                       "
                     >
                     </md-input>
@@ -141,7 +142,7 @@
                       id="month"
                       @input="
                         sendData('month', month);
-                        generaCE();
+                         generaCE();
                       "
                     >
                       <md-option value="1">Enero</md-option>
@@ -177,7 +178,7 @@
                       type="text"
                       @change="
                         sendData('year', year);
-                        generaCE();
+                         generaCE();
                       "
                     >
                     </md-input>
@@ -202,7 +203,7 @@
                       id="nacimiento"
                       @input="
                         sendData('nacimiento', nacimiento);
-                        generaCE();
+                         generaCE();
                       "
                     >
                       <md-option
@@ -234,7 +235,7 @@
                       id="sexo"
                       @input="
                         sendData('sexo', sexo);
-                        generaCE();
+                         generaCE();
                       "
                     >
                       <md-option value="H">Hombre</md-option>
@@ -248,47 +249,93 @@
               >
                 <ValidationProvider
                   name="ce"
-                  rules="required|min:15|max:15|clve"
+                  rules="required"
                   v-slot="{ passed, failed }"
                 >
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Clave Elector</label>
+                    <label>Clave Elector </label>
                     <md-input
                       v-model="ce"
                       type="text"
-                      @change="sendData('ce', ce)"
-                      disabled
+                      @change="sendClave('ce', ce)"
+                     
                     >
                     </md-input>
                   </md-field>
+                  <md-dialog-alert
+                  :md-active.sync="alerta"
+                  md-title="Alerta"
+                  md-content="La Clave de Elector ya se encuentra registrada"
+                  md-confirm-text="ACEPTAR"
+                  />
+                    
                 </ValidationProvider>
               </div>
-              <div
-                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+               <div
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
               >
                 <ValidationProvider
-                  name="cp"
+                  name="residencia"
                   rules="required|numeric"
                   v-slot="{ passed, failed }"
                 >
                   <md-field
                     :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
                   >
-                    <label>Código Postal</label>
-                    <md-input
-                      v-model="cp"
-                      type="text"
-                      @change="
-                        sendData('cp', cp);
-                        getColonias();
+                    <label>Lugar de Residencia</label>
+                    <md-select
+                      v-model="residencia"
+                      name="residencia"
+                      id="residencia"
+                      @input="
+                       
+                        getMunicipios();
                       "
                     >
-                    </md-input>
+                      <md-option
+                        v-for="ef in entidadeFederativas"
+                        :key="ef.id"
+                        :value="ef.id"
+                        >{{ ef.nombre }}</md-option
+                      >
+                    </md-select>
                   </md-field>
                 </ValidationProvider>
               </div>
+              <div
+                class="md-layout-item md-size-50 md-small-size-100 md-medium-size-100"
+              >
+                <ValidationProvider
+                  name="Municipio"
+                  rules="required"
+                  v-slot="{ passed, failed }"
+                >
+                  <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Municipio</label>
+                    <md-select
+                      v-model="municipio"
+                      name="municipio"
+                      id="municipio"
+                      @input="
+                       
+                        getColonias();
+                      "
+                    >
+                       <md-option
+                        v-for="mu in municipios"
+                        :key="mu.id"
+                        :value="mu.id"
+                        >{{ mu.nombre }}</md-option
+                      >
+                    </md-select>
+                  </md-field>
+                </ValidationProvider>
+              </div>
+             
               <div
                 class="md-layout-item md-size-35 md-small-size-100 md-medium-size-100"
               >
@@ -317,6 +364,29 @@
                         >{{ col.nombre }}</md-option
                       >
                     </md-select>
+                  </md-field>
+                </ValidationProvider>
+              </div>
+               <div
+                class="md-layout-item md-size-30 md-small-size-100 md-medium-size-100"
+              >
+                <ValidationProvider
+                  name="cp"
+                  rules="numeric"
+                  v-slot="{ passed, failed }"
+                >
+                  <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Código Postal</label>
+                    <md-input
+                      v-model="cp"
+                      type="text"
+                      @change="
+                        sendData('cp', cp);
+                      "
+                    >
+                    </md-input>
                   </md-field>
                 </ValidationProvider>
               </div>
@@ -499,6 +569,9 @@ extend("numeric", numeric);
 export default {
   data() {
     return {
+      alerta:false,
+      municipio:"",
+      residencia:"",
       nombre: "",
       apellidop: "",
       apellidom: "",
@@ -518,6 +591,7 @@ export default {
       adicional_tel: "",
       redsocial: "",
       entidadeFederativas: [],
+      municipios:[],
       colonias: [],
       secciones: []
     };
@@ -525,6 +599,32 @@ export default {
   methods: {
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
+    },
+    sendClave(field, val) {
+      let cObject=this;
+      cObject.compruebaClave(val);
+      this.$emit("data", { field: field, value: val });
+    },
+    compruebaClave(cve){
+       let cObject=this;
+      axios
+        .get(APIURL + "comprueba/cve/electoral", {
+          params:{
+            cve_elector:cve
+          },
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          if(response.data==202){
+            cObject.alerta=true;
+          }
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+      
     },
     validate() {
       return this.$refs.form.validate().then(res => {
@@ -547,14 +647,29 @@ export default {
           cObject.$helpers.catchError(error);
         });
     },
+      getMunicipios() {
+      let cObject = this;
+      axios
+        .get(APIURL + "municipios/"+this.residencia, {
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          cObject.municipios = response.data.data;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    },
     getColonias() {
       let cObject = this;
-      if (this.cp.length < 4) return;
+      //if (this.cp.length < 4) return;
       this.colonia = "";
       this.seccion = "";
       this.secciones = [];
       axios
-        .get(APIURL + "colonias/" + this.cp, {
+        .get(APIURL + "colonias/" + this.municipio, {
           headers: {
             Authorization: "Bearer " + this.$store.state.sop.authorization.token
           }
@@ -571,7 +686,7 @@ export default {
       this.seccion = "";
       this.secciones = [];
       axios
-        .get(APIURL + "secciones/" + this.cp + "/" + this.colonia, {
+        .get(APIURL + "secciones/" + this.municipio + "/" + this.colonia, {
           headers: {
             Authorization: "Bearer " + this.$store.state.sop.authorization.token
           }

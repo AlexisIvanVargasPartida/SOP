@@ -1,6 +1,6 @@
-<template>
-  <div class="md-layout">
-    <div
+<template >
+  <div class="md-layout" id="page" >
+    <div 
       class="md-layout-item md-medium-size-100 md-small-size-100"
       :class="entidades.length > 1 ? 'md-size-33' : 'md-size-100'"
       v-if="entidades.length > 1"
@@ -33,6 +33,8 @@
     <div
       class="md-layout-item md-medium-size-100 md-small-size-100 mx-auto"
       :class="entidades.length > 1 ? 'md-size-33' : 'md-size-50'"
+
+      
     >
       <md-card>
         <md-card-header class="md-card-header-icon md-card-header-green">
@@ -83,15 +85,17 @@
         </md-card-content>
       </md-card>
     </div>
-    <div class="md-layout-item md-size-100">
-      <md-card>
-        <md-card-content>
+    <div class="md-layout-item md-size-100" ref="content" id="printTable2">
+      <md-card >
+        <md-card-content >
           <md-table
             :value="queriedData"
             :md-sort.sync="currentSort"
             :md-sort-order.sync="currentSortOrder"
             :md-sort-fn="customSort"
             class="paginated-table table-striped table-hover"
+            id="printTable" 
+           
           >
             <md-table-toolbar>
               <md-field>
@@ -115,7 +119,8 @@
                   clearable
                   style="width: 200px"
                   placeholder="Search records"
-                  v-model="searchQuery"
+                  v-model="query"
+                  @keyup.enter="filter"
                 >
                 </md-input>
               </md-field>
@@ -126,25 +131,28 @@
               v-if="loader"
               style="margin-top:15px"
             ></md-progress-bar>
-            <md-table-row slot="md-table-row" slot-scope="{ item }">
-              <md-table-cell md-label="Nombre" md-sort-by="name"
+            <md-table-row slot="md-table-row" slot-scope="{ item }"  >
+              <md-table-cell md-label="Nombre" md-sort-by="name" 
                 >{{ item.nombre }} {{ item.paterno }}
                 {{ item.materno }}</md-table-cell
               >
-              <md-table-cell md-label="Calle" md-sort-by="email">{{
+              <md-table-cell md-label="Clave Elector" width="1000px" md-sort-by="cve_elector" >{{
+                item.cve_elector
+              }}</md-table-cell>
+              <md-table-cell md-label="Calle" md-sort-by="email"  align="center">{{
                 item.calle
               }}</md-table-cell>
-              <md-table-cell md-label="Número">{{
+              <md-table-cell md-label="Número" >{{
                 item.num_ext
               }}</md-table-cell>
-              <md-table-cell md-label="Colonia">{{
+              <md-table-cell md-label="Colonia" >{{
                 item.colonia
               }}</md-table-cell>
               <md-table-cell md-label="CP">{{ item.cp }}</md-table-cell>
-              <md-table-cell md-label="Sección">{{
+              <md-table-cell md-label="Sección" >{{
                 item.seccion
               }}</md-table-cell>
-              <md-table-cell md-label="Acciónes">
+              <md-table-cell md-label="Acciónes" >
                 <md-button
                   v-if="!item.simpatiza"
                   class="md-just-icon md-warning md-simple"
@@ -156,7 +164,7 @@
               </md-table-cell>
             </md-table-row>
           </md-table>
-          <div class="footer-table md-table" v-if="queriedData.length > 0">
+          <div class="footer-table md-table"  v-if="queriedData.length > 0">
             <table>
               <tfoot>
                 <tr>
@@ -233,6 +241,11 @@
           ></md-progress-spinner>
         </template>
       </modal>
+      <center>
+     <button  id="btn" @click="genPDF(this)" class="btn btn-success">Descargar Datos de la tabla</button>
+     
+     <input type="button" @click="exCEL('printTable2', 'W3C Example Table')" value="Export to Excel">
+     </center>
     </div>
   </div>
 </template>
@@ -245,6 +258,14 @@ import Fuse from "fuse.js";
 import { Modal } from "@/components";
 import Simpatizante from "./Forms/Simpatiza";
 import { Badge } from "@/components";
+import jsPDF from 'jspdf';
+import html2PDF from 'jspdf-html2canvas';
+import html2canvas from 'html2canvas';
+import autoTable from 'jspdf-autotable';
+import pdfMake from 'pdfmake';
+import pdfFonts from 'pdfmake';
+import TableToExcel from "@linways/table-to-excel";
+
 export default {
   components: {
     Pagination,
@@ -285,6 +306,9 @@ export default {
   },
   data() {
     return {
+      todos:[],
+      query:"",
+      deshabilitada:false,
       asycFinish: false,
       currentSort: "nombre",
       currentSortOrder: "asc",
@@ -296,6 +320,7 @@ export default {
       },
       footerTable: [
         "Nombre",
+        "Clave Elector",
         "Calle",
         "Número",
         "Colonia",
@@ -443,6 +468,9 @@ export default {
             this.entidad +
             "/municipios",
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
@@ -474,6 +502,9 @@ export default {
             this.municipio +
             "/secciones",
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
@@ -481,7 +512,19 @@ export default {
           }
         )
         .then(response => {
-          cObject.secciones = response.data.data;
+          let data=response.data;
+          if(data.coordinador){
+            cObject.secciones=data.data;
+            cObject.seccion=data.seccion;
+            document.getElementById("seccion").disabled=true;
+            cObject.deshabilitada=data.coordinador;
+          }else{
+            cObject.secciones=data.data;
+            cObject.deshabilitada=data.coordinador;
+            document.getElementById("seccion").disabled=false;
+
+
+          }
         })
         .catch(error => {
           cObject.$helpers.catchError(error);
@@ -503,8 +546,11 @@ export default {
             "/" +
             this.seccion +
             "/poblacion?page=" +
-            page,
+            page+"&busqueda=null",
           {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
             headers: {
               Authorization:
                 "Bearer " + this.$store.state.sop.authorization.token
@@ -513,14 +559,172 @@ export default {
         )
         .then(response => {
           cObject.tableData = response.data.data.data;
+          cObject.todos = response.data.data.data;
           cObject.pagination.total = response.data.data.total;
           cObject.loader = false;
         })
         .catch(error => {
           cObject.$helpers.catchError(error);
         });
+    },
+    filter(page = 1) {
+      let cObject = this;
+      this.loader = true;
+      //if (this.seccion == null) return;
+      axios
+        .get(
+          APIURL +
+            "candidato/" +
+            this.$store.state.sop.user.idcandidato +
+            "/" +
+            this.entidad +
+            "/" +
+            this.municipio +
+            "/" +
+            this.seccion +
+            "/poblacion?page=" +
+            page+"&busqueda="+this.query,
+
+          {
+            params:{
+             id:this.$store.state.sop.user.idusr
+            },
+            headers: {
+              Authorization:
+                "Bearer " + this.$store.state.sop.authorization.token
+            }
+          }
+        )
+        .then(response => {
+          cObject.tableData = response.data.data.data;
+          cObject.todos = response.data.data.data;
+          cObject.pagination.total = response.data.data.total;
+          cObject.loader = false;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+    },
+    genPDF(){
+      TableToExcel.convert(document.getElementById("printTable"));
+
+    },
+     exCEL(tableId, filename){
+       let dataType = 'application/vnd.ms-excel';
+    let extension = '.xls';
+
+    let base64 = function(s) {
+        return window.btoa(unescape(encodeURIComponent(s)))
+    };
+
+    let template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+    let render = function(template, content) {
+        return template.replace(/{(\w+)}/g, function(m, p) { return content[p]; });
+    };
+
+    let tableElement = document.getElementById(tableId);
+
+    let tableExcel = render(template, {
+        worksheet: filename,
+        table: tableElement.innerHTML
+    });
+
+    filename = filename + extension;
+
+    if (navigator.msSaveOrOpenBlob)
+    {
+        let blob = new Blob(
+            [ '\ufeff', tableExcel ],
+            { type: dataType }
+        );
+
+        navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+        let downloadLink = document.createElement("a");
+
+        document.body.appendChild(downloadLink);
+
+        downloadLink.href = 'data:' + dataType + ';base64,' + base64(tableExcel);
+
+        downloadLink.download = filename;
+
+        downloadLink.click();
     }
+     
+   
+
+
+
+
+
+       /*
+   let divToPrint=document.getElementById("printTable");
+   let newWin= window.open("");
+   newWin.document.write(divToPrint.outerHTML);
+   newWin.print();
+   newWin.close();
+   printData();
+    
+}
+*/
+
+
+
+
+
+    
+   /* El bueno es este 
+
+
+ html2canvas(document.body).then(canvas => {
+    let pdf = new jsPDF('p', 'pt', 'a4');
+    var width = pdf.internal.pageSize.getWidth();
+    var height = pdf.internal.pageSize.getHeight();
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG',  0, 0, width, height);
+    pdf.save(); 
+});*/
+     }
+
+
+   /* let pdf = new jsPDF();
+    let element = document.getElementById('page');
+    let width= element.style.width;
+    let height = element.style.height;
+    html2canvas(element).then(canvas => {
+        let image = canvas.toDataURL('image/png');
+        pdf.addImage(image, 'JPEG', width, height);
+        pdf.save('page.pdf');
+    }); */
+       
+//let page = document.getElementById('page');
+
+ // html2PDF(page, {
+  //  jsPDF: {
+  //    format: 'a4',
+   // },
+   // imageType: 'image/jpeg',
+   // output: './pdf/generate.pdf'
+  //});
+
+
+       //const doc=new jsPDF();
+       //const html=this.$refs.content.innerHTML;
+       
+       //doc.fromHTML(html,15,15,{
+       //  width:150
+       //})
+       //doc.save("tabla.pdf");
+
+
+
+      //let pdf=new jsPDF();
+      //pdf.autoTable({html:'#tabla'});
+      //pdf.save('tabla.pdf');
+  
+    
+   
   },
+   
   created() {
     this.getEntidades();
   },
@@ -551,6 +755,7 @@ export default {
     }
   }
 };
+
 </script>
 
 <style lang="css" scoped>

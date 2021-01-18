@@ -64,16 +64,79 @@
                 <md-radio
                   v-model="participacion"
                   value="Solo Simpatizo"
-                  @change="sendData('participacion', participacion)"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);
+                  selDem(false);"
                   >Sólo Simpatizo</md-radio
                 >
                 <md-radio
                   v-model="participacion"
-                  @change="sendData('participacion', participacion)"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);
+                  selDem(false);"
                   value="Promotor"
                   class="md-primary"
                   >Promotor</md-radio
                 >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);
+                  selDem(false);"
+                  value="Gestor"
+                  class="md-primary"
+                  >Gestor de Familia</md-radio
+                >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(false);
+                  selDem(true);"
+                  value="CoordinadorD"
+                  class="md-primary"
+                  >Coordinador de Demarcación</md-radio
+                >
+                 <md-radio
+                  v-model="participacion"
+                  @change="sendData('participacion', participacion);
+                  selJefe(true);
+                  selDem(false);"
+                  value="Jefe"
+                  class="md-primary"
+                  >Jefe de Sección</md-radio 
+                >
+              <div v-if="jefe">
+                  <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Sección</label>
+              <md-select
+              v-model="seccion"
+              name="seccion"
+              id="seccion"
+              @input="sendData('jefe_seccion', seccion)"
+              ><md-option v-for="(se, id) in secciones" :key="id" :value="se.id"
+                >Sección {{ se.seccion }}</md-option
+              >
+            </md-select>
+                  </md-field>
+            </div>
+             <div v-if="demarcacion">
+                <md-field
+                    :class="[{ 'md-error': failed }, { 'md-valid': passed }]"
+                  >
+                    <label>Demarcación</label>
+              <md-select
+              v-model="dem"
+              name="dem"
+              id="dem"
+              @input="sendData('coord_dem', dem)"
+              ><md-option v-for="(dm, id) in demarcaciones" :key="id" :value="dm.id"
+                >Demarcación {{ dm.demarcacion }} Secciones {{dm.secciones}}</md-option
+              >
+            </md-select>
+                </md-field>
+            </div>
               </div>
               <label
                 v-if="simpatiza == 'NO'"
@@ -106,6 +169,7 @@
                   class="md-primary"
                   >Deseo Esperar</md-radio
                 >
+             
               </div>
 
               <label
@@ -160,12 +224,24 @@ export default {
       simpatiza: "",
       participacion: "",
       negativa: "",
-      likeconocer: ""
+      likeconocer: "",
+      jefe:false,
+      demarcacion:false,
+      secciones:[],
+      seccion:"",
+      demaraciones:[],
+      dem:""
     };
   },
   methods: {
     sendData(field, val) {
       this.$emit("data", { field: field, value: val });
+    },
+    selJefe(val){
+    this.jefe=val;
+    },
+    selDem(val){
+    this.demarcacion=val;
     },
     validate() {
       return this.$refs.form.validate().then(res => {
@@ -186,7 +262,33 @@ export default {
       });
     }
   },
-  created() {}
+  created() {
+    let cObject=this;
+       axios
+        .get(APIURL + "secciones/usuario/" + this.$store.state.sop.user.idusr, {
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          cObject.secciones = response.data.data;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+        axios
+        .get(APIURL + "demarcaciones/usuario/" + this.$store.state.sop.user.idusr, {
+          headers: {
+            Authorization: "Bearer " + this.$store.state.sop.authorization.token
+          }
+        })
+        .then(response => {
+          cObject.demarcaciones = response.data.data;
+        })
+        .catch(error => {
+          cObject.$helpers.catchError(error);
+        });
+  }
 };
 </script>
 <style lang="scss"></style>

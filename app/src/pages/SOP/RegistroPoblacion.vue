@@ -1,5 +1,11 @@
 <template>
   <div class="md-layout">
+    <md-dialog-alert
+                  :md-active.sync="alerta"
+                  md-title="Alerta"
+                  md-content="La Clave de Elector ya se encuentra registrada"
+                  md-confirm-text="ACEPTAR"
+                  />
     <div
       class="md-layout-item md-size-80 md-xsmall-size-80 mx-auto"
       v-if="!dataSend"
@@ -63,6 +69,7 @@ import { SimpleWizard, WizardTab } from "@/components";
 export default {
   data() {
     return {
+      alerta:false,
       wizardModel: {},
       data: {},
       dataSend: false,
@@ -96,7 +103,9 @@ export default {
         negativa: this.data.negativa || null,
         participacion: this.data.participacion || null,
         likeconocer: this.data.likeconocer || null,
-        redsocial: this.data.redsocial || null
+        redsocial: this.data.redsocial || null,
+        jefe_seccion:this.data.jefe_seccion || null,
+        coord_dem:this.data.coord_dem || null
       };
 
       dataCandidato.telefonos.push(this.data.telefono);
@@ -120,6 +129,8 @@ export default {
             colonia: this.data.colonia,
             cp: this.data.cp,
             seccion: this.data.seccion,
+            jefe_seccion:this.data.jefe_seccion,
+            coord_dem:this.data.coord_dem,
             simpatiza: this.data.simpatiza,
             year: this.data.year,
             month: this.data.month,
@@ -134,6 +145,10 @@ export default {
           }
         )
         .then(response => {
+          if(response.data==202){
+            cObject.alerta=true;
+            return;
+          }
           cObject.dataSend = true;
         })
         .catch(error => {

@@ -68,6 +68,8 @@
                   Iniciar
                 </md-button>
               </div>
+
+                <a href="http://localhost:8080/recuperar-contrasena">¿Olvidó su contraseña?</a>
               <div
                 class="md-layout-item md-size-50 md-small-size-100 mx-auto"
                 v-if="!btn"

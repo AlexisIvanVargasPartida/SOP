@@ -111,7 +111,11 @@ export default {
           values: this.data.values,
           nombre: this.data.nombre,
           email: this.data.email,
-          password: this.data.password
+          password: this.data.password,
+          coordinador:this.data.coordinador,
+          candidato:this.data.candidato,
+          co_de:this.data.co_de,
+          demarcacion:this.data.demarcacion
         })
         .then(response => {
           cObject.dataSend = true;
