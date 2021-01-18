@@ -19,9 +19,11 @@ class Graficas extends Controller
             'entidad' => 'required|integer',
             'filtro' => 'required|string|in:all,simpatizantes,nosimpatizantes,noconocen,nodeciden'
         ])->validate();*/
+        $municipio = "";
+
         $user = User::find($request->id);
         if($user->coordinador != "S"){
-            $candidato =  DB::table('candidato')->find($id);
+            $candidato =  DB::table('candidato')->find($user->candidato_id);
             $config = json_decode($candidato->configuacion, true)['registros'];
             $reg = explode("-",$config);
 
@@ -31,6 +33,7 @@ class Graficas extends Controller
                     ->where('clave_municipio', $reg[1])
                     ->get(['id', 'clave_municipio', 'nombre'])
                     ->toArray();
+
             }elseif (count($reg) == 1) {
                 $municipiosData = DB::table('municipios')
                     ->where('clave_entidad_federal', $reg[0])
@@ -43,7 +46,6 @@ class Graficas extends Controller
             $config = json_decode($candidato->configuracion, true)['registros'];
 
             $reg = explode("-",$config);
-            $municipio = "";
             if($user->co_de == "S"){
                 $ar = explode(":",$reg[0]);
                 $data = DB::table('demarcaciones')->find($ar[1]);
@@ -74,7 +76,7 @@ class Graficas extends Controller
 
         $data = [];
         $tipoFiltro = ["simpatizantes" => "SI", "nosimpatizantes" => "NO", "noconocen" => "NO LO CONOZCO", "nodeciden" => "NO DECIDE",];
-        $userString = $id;
+        $userString = $user->candidato_id;
         foreach ($municipiosData as $value) {
             $data["Municipios"][] = $value->id;
             $data["idMunicipios"][$value->id] = $value->nombre;
@@ -89,14 +91,18 @@ class Graficas extends Controller
             }
         }
         if ($filter != "all") {
-            $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $municipio, $userString, $tipoFiltro[$filter]);
+            foreach ($municipiosData as $value) {
+                $data["Municipios"][] = $value->id;
+                $data["idMunicipios"][$value->id] = $value->nombre;
+                $data["poblacion"][] = $this->consultaSimpatizantesData($entidad, $value->clave_municipio, $userString, $tipoFiltro[$filter]);
+            }
         }
         return response()->json(["data" => $data], 200);
     }
 
     public function candidatoMunicipiosFiltro(Request $request, $id, $entidad, $municipio, $filter)
     {
-        if ($request->user()->candidato_id != $id) return response()->json(["error" => "No tiene Permisos"], 401);
+        //if ($request->user()->candidato_id != $id) return response()->json(["error" => "No tiene Permisos"], 401);
         Validator::make(array_merge($request->all(), ["id" => $id, "entidad" => $entidad, "municipio" => $municipio, "filtro" => $filter]), [
             'id' => 'required|integer|exists:candidato,id',
             'municipio' => 'required|integer',

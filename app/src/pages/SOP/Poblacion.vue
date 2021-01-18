@@ -85,7 +85,7 @@
         </md-card-content>
       </md-card>
     </div>
-    <div class="md-layout-item md-size-100" ref="content" >
+    <div class="md-layout-item md-size-100" ref="content" id="printTable2">
       <md-card >
         <md-card-content >
           <md-table
@@ -94,7 +94,7 @@
             :md-sort-order.sync="currentSortOrder"
             :md-sort-fn="customSort"
             class="paginated-table table-striped table-hover"
-            id="printTable"
+            id="printTable" 
            
           >
             <md-table-toolbar>
@@ -131,7 +131,7 @@
               v-if="loader"
               style="margin-top:15px"
             ></md-progress-bar>
-            <md-table-row slot="md-table-row" slot-scope="{ item }">
+            <md-table-row slot="md-table-row" slot-scope="{ item }"  >
               <md-table-cell md-label="Nombre" md-sort-by="name" 
                 >{{ item.nombre }} {{ item.paterno }}
                 {{ item.materno }}</md-table-cell
@@ -242,7 +242,9 @@
         </template>
       </modal>
       <center>
-     <button  id="btn" @click="genPDF" class="btn btn-success">Descargar Datos de la tabla</button>
+     <button  id="btn" @click="genPDF(this)" class="btn btn-success">Descargar Datos de la tabla</button>
+     
+     <input type="button" @click="exCEL('printTable2', 'W3C Example Table')" value="Export to Excel">
      </center>
     </div>
   </div>
@@ -262,6 +264,8 @@ import html2canvas from 'html2canvas';
 import autoTable from 'jspdf-autotable';
 import pdfMake from 'pdfmake';
 import pdfFonts from 'pdfmake';
+import TableToExcel from "@linways/table-to-excel";
+
 export default {
   components: {
     Pagination,
@@ -601,7 +605,57 @@ export default {
           cObject.$helpers.catchError(error);
         });
     },
-     genPDF(){
+    genPDF(){
+      TableToExcel.convert(document.getElementById("printTable"));
+
+    },
+     exCEL(tableId, filename){
+       let dataType = 'application/vnd.ms-excel';
+    let extension = '.xls';
+
+    let base64 = function(s) {
+        return window.btoa(unescape(encodeURIComponent(s)))
+    };
+
+    let template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+    let render = function(template, content) {
+        return template.replace(/{(\w+)}/g, function(m, p) { return content[p]; });
+    };
+
+    let tableElement = document.getElementById(tableId);
+
+    let tableExcel = render(template, {
+        worksheet: filename,
+        table: tableElement.innerHTML
+    });
+
+    filename = filename + extension;
+
+    if (navigator.msSaveOrOpenBlob)
+    {
+        let blob = new Blob(
+            [ '\ufeff', tableExcel ],
+            { type: dataType }
+        );
+
+        navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+        let downloadLink = document.createElement("a");
+
+        document.body.appendChild(downloadLink);
+
+        downloadLink.href = 'data:' + dataType + ';base64,' + base64(tableExcel);
+
+        downloadLink.download = filename;
+
+        downloadLink.click();
+    }
+     
+   
+
+
+
+
 
        /*
    let divToPrint=document.getElementById("printTable");
@@ -619,7 +673,7 @@ export default {
 
 
     
-   
+   /* El bueno es este 
 
 
  html2canvas(document.body).then(canvas => {
@@ -628,8 +682,10 @@ export default {
     var height = pdf.internal.pageSize.getHeight();
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG',  0, 0, width, height);
     pdf.save(); 
-});
+});*/
      }
+
+
    /* let pdf = new jsPDF();
     let element = document.getElementById('page');
     let width= element.style.width;
@@ -668,6 +724,7 @@ export default {
     
    
   },
+   
   created() {
     this.getEntidades();
   },
